@@ -1,6 +1,6 @@
 [submodule "desktop/cg_math"]
 	path = desktop/cg_math
-	url = ../cg_math
+	url = https://github.com/pjScipio/cg_math.git
 [submodule "desktop/cg_ui"]
 	path = desktop/cg_ui
-	url = ../cg_ui
+	url = https://github.com/pjScipio/cg_ui.git
