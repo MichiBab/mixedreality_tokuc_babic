@@ -12,7 +12,7 @@ public class BasisFunctionBezier implements BasisFunction {
     // B(n,i,t) = binomial(n,i) * t^i * (1-t) ^(n-i)
     @Override
     public float eval(float t, int index, int degree) {
-        double bernsteinPolynom = binomial(degree, index) * Math.pow(t, index) * Math.pow((1 - t), (degree - 1));
+        double bernsteinPolynom = binomial(degree, index) * Math.pow(t, index) * Math.pow((1 - t), (degree - i));
         // System.out.println("polynom" + bernsteinPolynom + "t" + t + "degree" +
         // degree);
         return (float) bernsteinPolynom;
