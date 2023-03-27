@@ -44,13 +44,13 @@ public class BasisFunctionBezier implements BasisFunction {
         return (float) sum;
     }
 
-    private static long binomial(int n, int k) {
+    public static long binomial(long n, long k) {
         if (k > n - k) {
             k = n - k;
         }
 
         long b = 1;
-        for (int i = 1, m = n; i <= k; i++, m--) {
+        for (long i = 1, m = n; i <= k; i++, m--) {
             b = b * m / i;
         }
         return b;

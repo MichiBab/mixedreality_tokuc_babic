@@ -33,6 +33,15 @@ public class BezierTest {
     }
 
     @Test
+    public void testBinominal() {
+        long n = 10;
+        long k = 5;
+        long result = BasisFunctionBezier.binomial(n, k);
+        System.out.println("TEST RESULT: " + result);
+        assertEquals((long) 252, result);
+    }
+
+    @Test
     public void testEval() {
         float t;
         t = 0.0f;
