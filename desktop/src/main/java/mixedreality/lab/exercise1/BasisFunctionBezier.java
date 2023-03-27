@@ -20,27 +20,34 @@ public class BasisFunctionBezier implements BasisFunction {
     }
 
     @Override
-    public float evalDerivative(float t, int i, int degree) {
-        long binomial = binomial(degree, i);
+    public float evalDerivative(float t, int k, int degree) {
+        long binomial = binomial(degree, k);
         int n = degree;
 
         // Ableitungsfunktion aus Skript (Uni Heidelberg) übernommen
         // zur Anschaulichkeit in Summanden Aufgeteilt
         // erster Summand der Ableitung
-        double part1 = binomial * (n - i) * Math.pow((1 - t), (n - i - 1)) * (-1) * t * Math.pow(t, (i - 1));
+
+        double part1 = binomial * (n - k) * Math.pow((1 - t), (n - k - 1)) * (-1) * t * Math.pow(t, (k - 1));
 
         if (Float.isNaN((float) part1)) {
             part1 = 0.0f;
         }
         // zweiter Summand der Ableitung
-        double part2 = binomial * i * Math.pow(t, i - 1) * (1 - t) * Math.pow(1 - t, n - i - 1);
+        double part2 = binomial * k * Math.pow(t, k - 1) * (1 - t) * Math.pow(1 - t, n - k - 1);
 
         if (Float.isNaN((float) part2)) {
             part2 = 0.0f;
         }
 
+        // Handle ending edge case
+        if (k == degree && t == 1 && k == n) {
+            part1 = binomial * (n - k) * t * Math.pow(t, (k - 1));
+            part2 = binomial * k * Math.pow(t, k - 1);
+        }
+
         double sum = part1 + part2;
-        // System.out.println("sum" + sum + "t" + t + "degree" + n);
+
         return (float) sum;
     }
 

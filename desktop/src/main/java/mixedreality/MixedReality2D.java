@@ -28,7 +28,9 @@ public class MixedReality2D extends CG2DApplication {
         curve.addControlPoint(new Vector2f(0, 0));
         curve.addControlPoint(new Vector2f(0.5f, 0.5f));
         curve.addControlPoint(new Vector2f(1, 0));
-        // curve.addControlPoint(new Vector2f(1.5f, -1.5f));
+        curve.addControlPoint(new Vector2f(1.5f, -1.5f));
+        curve.addControlPoint(new Vector2f(2, 0));
+
         addScene2D(new CurveScene2D(600, 600, curve));
 
         // Assignment 2

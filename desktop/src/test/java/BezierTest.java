@@ -28,7 +28,7 @@ public class BezierTest {
         // vectors for derivative
         derivative1 = new Vector2f(1.0f, 1.0f);
         derivative2 = new Vector2f(1.0f, 0.0f);
-        derivative3 = new Vector2f(-1.0f, -1.0f);
+        derivative3 = new Vector2f(1.0f, -1.0f);
 
     }
 
