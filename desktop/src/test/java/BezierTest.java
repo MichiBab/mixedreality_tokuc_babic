@@ -32,6 +32,24 @@ public class BezierTest {
 
     }
 
+    private float calculateSumForT(float t) {
+        float sum = (float) 0.0;
+        for (int i = 0; i <= curve.getDegree(); i++) {
+            float val = bezierFunc.eval(t, i, curve.getDegree());
+            sum += val;
+        }
+        return sum;
+    }
+
+    @Test
+    public void testCurveSumm() {
+        for (float t = 0.0f; t <= 1.0f; t += 0.1f) {
+            float sum = calculateSumForT(t);
+            System.out.println("t: " + t + " sum: " + sum);
+            assertEquals(true, sum >= 0.999 && sum <= 1.001);
+        }
+    }
+
     @Test
     public void testBinominal() {
         long n = 10;
