@@ -26,9 +26,9 @@ public class BezierTest {
         point05 = new Vector2f(0.5f, 0.25f);
         point1 = new Vector2f(1, 0);
         // vectors for derivative
-        derivative1 = new Vector2f(0, 0);
+        derivative1 = new Vector2f(0.5f, 0.5f);
         derivative2 = new Vector2f(1.5f, 0.5f);
-        derivative3 = new Vector2f(1, 0);
+        derivative3 = new Vector2f(0.5f, 0.5f);
 
     }
 
@@ -59,14 +59,17 @@ public class BezierTest {
         float t;
         t = 0.0f;
         Vector2f vector1 = curve.evalDerivative(t);
+        assertEquals(derivative1, vector1);
         System.out.println("vector1");
         System.out.println(vector1);
         t = 0.5f;
         Vector2f vector2 = curve.evalDerivative(t);
+        assertEquals(derivative2, vector2);
         System.out.println("vector2");
         System.out.println(vector2);
         t = 1.0f;
         Vector2f vector3 = curve.evalDerivative(t);
+        assertEquals(derivative3, vector3);
         System.out.println("vector3");
         System.out.println(vector3);
 

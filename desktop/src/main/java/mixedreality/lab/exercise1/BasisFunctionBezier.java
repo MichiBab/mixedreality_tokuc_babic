@@ -24,8 +24,8 @@ public class BasisFunctionBezier implements BasisFunction {
         long binomial = binomial(i, degree);
         int n = degree;
 
-        // Ableitungsfunktion aus Skript (Uni Heidelberg) übernommen, zur
-        // Anschaulichkeit in Summanden Aufgeteilt
+        // Ableitungsfunktion aus Skript (Uni Heidelberg) übernommen
+        // zur Anschaulichkeit in Summanden Aufgeteilt
         // erster Summand der Ableitung
         double part1 = binomial * (n - i) * Math.pow((1 - t), (n - i - 1)) * t * Math.pow(t, (i - 1));
 
