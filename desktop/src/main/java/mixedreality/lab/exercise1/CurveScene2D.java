@@ -28,7 +28,7 @@ public class CurveScene2D extends Scene2D {
   protected static final int CURVE_RESOLUTION = 50;
   protected static final Color CONTROL_POINT_COLOR = new Color(200, 160, 60);
   protected static final Color CURVE_COLOR = new Color(80, 160, 180);
-  protected static final Color CURRENT_POINT_COLOR = new Color(14, 167, 181);//new Color(238,186,48);
+  protected static final Color CURRENT_POINT_COLOR = new Color(14, 167, 181);// new Color(238,186,48);
   protected static final Color CONVEX_HULL_COLOR = new Color(220, 220, 220);
   protected static final float TANGENT_LENGTH = 0.5f;
   protected static final float SELECT_ACCURACY = 10.0f;
@@ -91,10 +91,9 @@ public class CurveScene2D extends Scene2D {
     panel.add(new JLabel("t:"));
     JSlider sliderT = new JSlider();
     sliderT.addChangeListener(e -> {
-              t = sliderT.getValue() / 100.0f;
-              repaint();
-            }
-    );
+      t = sliderT.getValue() / 100.0f;
+      repaint();
+    });
     panel.add(sliderT);
 
     // Curve
@@ -165,7 +164,8 @@ public class CurveScene2D extends Scene2D {
   }
 
   /**
-   * Return the control point position for drawing in world coordinates. Special case:
+   * Return the control point position for drawing in world coordinates. Special
+   * case:
    * tangents in Hermite curve.
    */
   private Vector2f getControlPointPositionForDraw(int index) {
@@ -228,7 +228,7 @@ public class CurveScene2D extends Scene2D {
     if (showControlPolygon) {
       for (int i = 0; i < curve.getDegree(); i++) {
         Vector2f a = world2Pixel(
-                curve.getControlPoint(i));
+            curve.getControlPoint(i));
         Vector2f b = world2Pixel(curve.getControlPoint(i + 1));
         gc.setColor(CONTROL_POINT_COLOR);
         gc.drawLine((int) a.x, (int) a.y, (int) b.x, (int) b.y);

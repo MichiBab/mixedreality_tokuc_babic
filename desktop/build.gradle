@@ -20,6 +20,7 @@ sourceSets {
         java {
             srcDirs 'cg_math/src/test/java'
             srcDirs 'cg_ui/src/test/java'
+            srcDirs 'src/test/java'
         }
     }
 }

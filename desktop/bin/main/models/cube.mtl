@@ -1,0 +1,5 @@
+#
+#
+newmtl logo_haw
+map_Kd ../textures/checker.png
+
