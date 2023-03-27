@@ -11,7 +11,7 @@ import mixedreality.lab.exercise1.BasisFunctionBezier;
 public class BezierTest {
     Curve curve;
     BasisFunctionBezier bezierFunc;
-    Vector2f point0, point05, point1;
+    Vector2f point0, point05, point1, derivative1, derivative2, derivative3;
 
     @BeforeEach
     void setup() {
@@ -21,10 +21,14 @@ public class BezierTest {
         curve.addControlPoint(new Vector2f(0.5f, 0.5f));
         curve.addControlPoint(new Vector2f(1, 0));
 
-        // points to test on
+        // vectors for eval
         point0 = new Vector2f(0, 0);
         point05 = new Vector2f(0.5f, 0.25f);
         point1 = new Vector2f(1, 0);
+        // vectors for derivative
+        derivative1 = new Vector2f(0, 0);
+        derivative2 = new Vector2f(1.5f, 0.5f);
+        derivative3 = new Vector2f(1, 0);
 
     }
 
@@ -52,6 +56,19 @@ public class BezierTest {
 
     @Test
     public void testEvalDerivative() {
+        float t;
+        t = 0.0f;
+        Vector2f vector1 = curve.evalDerivative(t);
+        System.out.println("vector1");
+        System.out.println(vector1);
+        t = 0.5f;
+        Vector2f vector2 = curve.evalDerivative(t);
+        System.out.println("vector2");
+        System.out.println(vector2);
+        t = 1.0f;
+        Vector2f vector3 = curve.evalDerivative(t);
+        System.out.println("vector3");
+        System.out.println(vector3);
 
     }
 }

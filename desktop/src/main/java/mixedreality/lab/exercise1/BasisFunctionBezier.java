@@ -29,8 +29,15 @@ public class BasisFunctionBezier implements BasisFunction {
         // erster Summand der Ableitung
         double part1 = binomial * (n - i) * Math.pow((1 - t), (n - i - 1)) * t * Math.pow(t, (i - 1));
 
+        if (Float.isNaN((float) part1)) {
+            part1 = 0.0f;
+        }
         // zweiter Summand der Ableitung
         double part2 = binomial * i * Math.pow(t, i - 1) * (1 - t) * Math.pow(1 - t, n - i - 1);
+
+        if (Float.isNaN((float) part2)) {
+            part2 = 0.0f;
+        }
 
         double sum = part1 + part2;
         // System.out.println("sum" + sum + "t" + t + "degree" + n);
@@ -38,13 +45,14 @@ public class BasisFunctionBezier implements BasisFunction {
     }
 
     private static long binomial(int n, int k) {
-        if (k > n - k)
+        if (k > n - k) {
             k = n - k;
+        }
 
         long b = 1;
-        for (int i = 1, m = n; i <= k; i++, m--)
+        for (int i = 1, m = n; i <= k; i++, m--) {
             b = b * m / i;
+        }
         return b;
     }
-
 }
