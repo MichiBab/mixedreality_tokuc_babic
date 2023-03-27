@@ -23,7 +23,7 @@ public class BezierTest {
 
         // points to test on
         point0 = new Vector2f(0, 0);
-        point05 = new Vector2f(0.375f, 0.25f);
+        point05 = new Vector2f(0.5f, 0.25f);
         point1 = new Vector2f(1, 0);
 
     }
