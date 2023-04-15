@@ -80,6 +80,15 @@ public class Avatar {
         return ((angle + Math.PI) % (2 * Math.PI)) - Math.PI;
     }
 
+    public static double calculateAngleDifference(double from, double to) {
+        double diff = (to - from + 360) % 360;
+        if (diff > 180) {
+            diff = 360 - diff;
+            return -diff;
+        }
+        return diff;
+    }
+
     /**
      * Move the avatar along the current orientation.
      */
@@ -93,16 +102,37 @@ public class Avatar {
         }
         float diff_x = targetPos.x - pos.x;
         float diff_y = targetPos.y - pos.y;
-        float theta = (float) normalizeRad(Math.atan2(diff_x, diff_y));
-        rotationAngle = (float) normalizeRad(rotationAngle);
+        double theta = Math.atan2(diff_x, diff_y);
+
+        // convert theta to degrees [0; 360]
+        double theta_deg = Math.toDegrees(theta) - 90;
+        if (theta_deg < 0) {
+            theta_deg += 360;
+        }
+        double rotation_deg = Math.toDegrees(rotationAngle);
+        if (rotation_deg < 0) {
+            rotation_deg += 360;
+        }
+
+        double diff = calculateAngleDifference(rotation_deg, theta_deg);
+
+        System.out.println(
+                "wanted: " + theta_deg + "   current: " + rotation_deg + "   diff: " + diff);
+
+        // System.out.println(Math.toDegrees(Math.PI / 2));
+        System.out.println(Math.abs(diff) + " > " + 5 + " = " + (Math.abs(diff) > 5));
+        if (diff > 0) {
+            diff -= 180;
+        } else {
+            diff += 180;
+        }
+        if (Math.abs(diff) > 5) {
+            double step_size = diff % Math.toDegrees(ROTATION_VELOCITY);
+            System.out.println("step_size: " + step_size);
+            rotationAngle -= Math.toRadians(step_size);
+        }
 
         System.out.println(theta + "   " + rotationAngle);
-
-        // maximum rotation is just MAXIMUM_ROTATION
-        float max_rotation = Math.min(Math.abs(theta - rotationAngle), ROTATION_VELOCITY);
-        if (Math.abs(theta - rotationAngle) > Math.PI / 2) {
-            rotationAngle += max_rotation;
-        }
 
         // rotationAngle = rotationAngle - ((theta - rotationAngle) %
         // ROTATION_VELOCITY);
