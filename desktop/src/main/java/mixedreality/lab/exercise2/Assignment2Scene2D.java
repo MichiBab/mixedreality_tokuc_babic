@@ -32,7 +32,7 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
      */
     private AnimatedSprite avatarSprite;
 
-    //private final Sprite staticSprite;
+    // private final Sprite staticSprite;
 
     /**
      * This class controls the behavior of the avatar
@@ -73,7 +73,8 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
     }
 
     /**
-     * This method is called once before rendering and is used to update the game state.
+     * This method is called once before rendering and is used to update the game
+     * state.
      */
     private void updateGame() {
         // Move avatar into current orientation
@@ -129,32 +130,28 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 10),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                ),
+                        9, false),
                 new SpriteAnimationImporter.ImportParams(
                         "sprites/character_sprites.png",
                         WALK_ANIMATION_IDS[Constants.WalkAnimations.WALK_W.ordinal()],
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 9),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                ),
+                        9, false),
                 new SpriteAnimationImporter.ImportParams(
                         "sprites/character_sprites.png",
                         WALK_ANIMATION_IDS[Constants.WalkAnimations.WALK_N.ordinal()],
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 8),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                ),
+                        9, false),
                 new SpriteAnimationImporter.ImportParams(
                         "sprites/character_sprites.png",
                         WALK_ANIMATION_IDS[Constants.WalkAnimations.WALK_E.ordinal()],
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 11),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                )
+                        9, false)
         };
         avatarSprite = SpriteAnimationImporter.importAnimatedSprite(importParams);
     }
@@ -187,8 +184,50 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
      * Compute the walking animation constant for the current avatar rotation.
      */
     protected Constants.WalkAnimations computeAnimationForOrientation() {
-        // TODO
-        return Constants.WalkAnimations.WALK_E;
+        // rad to degree
+        Vector2f orientation = avatar.getOrientation();
+        float angle = (float) Math.toDegrees(orientation.getAngle());
+        // round to 0-360
+        // 90 degrees is north, 0 degrees is east
+        angle = (angle + 360) % 360;
+        System.out.println(angle);
+
+        // if angle is between 45 and 135, return north. If it is between 135 and 225,
+        // return west, etc.
+        if (angle >= 45 && angle < 135) {
+            return Constants.WalkAnimations.WALK_N;
+        } else if (angle >= 135 && angle < 225) {
+            return Constants.WalkAnimations.WALK_W;
+        } else if (angle >= 225 && angle < 315) {
+            return Constants.WalkAnimations.WALK_S;
+        } else {
+            return Constants.WalkAnimations.WALK_E;
+        }
+        /*
+         * // if angle is between 67.5 and 112.5, return north. If it is between 112.5
+         * and
+         * // 157.5, return north_west
+         * // etc.
+         * if (angle >= 67.5 && angle < 112.5) {
+         * return Constants.WalkAnimations.WALK_N;
+         * } else if (angle >= 112.5 && angle < 157.5) {
+         * return Constants.WalkAnimations.WALK_NW;
+         * } else if (angle >= 157.5 && angle < 202.5) {
+         * return Constants.WalkAnimations.WALK_W;
+         * } else if (angle >= 202.5 && angle < 247.5) {
+         * return Constants.WalkAnimations.WALK_SW;
+         * } else if (angle >= 247.5 && angle < 292.5) {
+         * return Constants.WalkAnimations.WALK_S;
+         * } else if (angle >= 292.5 && angle < 337.5) {
+         * return Constants.WalkAnimations.WALK_SE;
+         * } else if (angle >= 337.5 || angle < 22.5) {
+         * return Constants.WalkAnimations.WALK_E;
+         * } else if (angle >= 22.5 && angle < 67.5) {
+         * return Constants.WalkAnimations.WALK_NE;
+         * } else {
+         * return Constants.WalkAnimations.WALK_E;
+         * }
+         */
     }
 
     /**
@@ -196,6 +235,21 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
      * should follow the avatar.
      */
     protected Matrix3f getArrowPose(Avatar avatar, Vector2f spritePos) {
-        return new Matrix3f();
+        float x_pos = spritePos.x;
+        float y_pos = spritePos.y;
+        float x_target = avatar.getPos().x;
+        float y_target = avatar.getPos().y;
+        Vector2f direction_vector = new Vector2f(x_target - x_pos, y_target - y_pos);
+        double angle = Math.atan2(direction_vector.y, direction_vector.x);
+        // add half a pie to get the correct rotation
+        angle += 1.5 * Math.PI;
+        double cos_angle = Math.cos(angle);
+        double sin_angle = Math.sin(angle);
+
+        Matrix3f rotationMatrix = new Matrix3f(
+                (float) cos_angle, (float) sin_angle, x_pos,
+                (float) -sin_angle, (float) cos_angle, y_pos,
+                0, 0, 1);
+        return rotationMatrix;
     }
 }
