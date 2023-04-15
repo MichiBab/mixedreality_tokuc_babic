@@ -11,7 +11,8 @@ out/
 # Android Studio configuration.
 *.iml
 .idea/
-
+bin/**
+desktop/bin/**
 # Gradle configuration.
 .gradle/
 android/gradle/
