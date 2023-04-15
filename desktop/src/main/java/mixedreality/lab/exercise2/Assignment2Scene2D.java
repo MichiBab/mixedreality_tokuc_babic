@@ -32,7 +32,7 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
      */
     private AnimatedSprite avatarSprite;
 
-    //private final Sprite staticSprite;
+    // private final Sprite staticSprite;
 
     /**
      * This class controls the behavior of the avatar
@@ -73,7 +73,8 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
     }
 
     /**
-     * This method is called once before rendering and is used to update the game state.
+     * This method is called once before rendering and is used to update the game
+     * state.
      */
     private void updateGame() {
         // Move avatar into current orientation
@@ -98,7 +99,7 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
 
         // Show orientation
         drawLine(g, avatar.getPos(),
-                avatar.getPos().add(avatar.getOrientation().mult(0.2f)), Color.LIGHT_GRAY);
+                avatar.getPos().add(avatar.getOrientation().mult(0.2f)), Color.RED);
 
         // Draw avatar sprite
         avatarSprite.draw(g, world2Pixel(avatar.getPos()));
@@ -129,32 +130,28 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 10),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                ),
+                        9, false),
                 new SpriteAnimationImporter.ImportParams(
                         "sprites/character_sprites.png",
                         WALK_ANIMATION_IDS[Constants.WalkAnimations.WALK_W.ordinal()],
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 9),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                ),
+                        9, false),
                 new SpriteAnimationImporter.ImportParams(
                         "sprites/character_sprites.png",
                         WALK_ANIMATION_IDS[Constants.WalkAnimations.WALK_N.ordinal()],
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 8),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                ),
+                        9, false),
                 new SpriteAnimationImporter.ImportParams(
                         "sprites/character_sprites.png",
                         WALK_ANIMATION_IDS[Constants.WalkAnimations.WALK_E.ordinal()],
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 11),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                )
+                        9, false)
         };
         avatarSprite = SpriteAnimationImporter.importAnimatedSprite(importParams);
     }
@@ -187,8 +184,31 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
      * Compute the walking animation constant for the current avatar rotation.
      */
     protected Constants.WalkAnimations computeAnimationForOrientation() {
-        // TODO
-        return Constants.WalkAnimations.WALK_E;
+
+        // TODO: implement all constants
+
+        float diffX = avatar.targetPos.x - avatar.pos.x;
+        float diffY = avatar.targetPos.y - avatar.pos.y;
+
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            // x axis
+            if (diffX > 0) {
+                // right
+                return Constants.WalkAnimations.WALK_E;
+            } else {
+                // left
+                return Constants.WalkAnimations.WALK_W;
+            }
+        } else {
+            // y axis
+            if (diffY > 0) {
+                // up
+                return Constants.WalkAnimations.WALK_N;
+            } else {
+                // down
+                return Constants.WalkAnimations.WALK_S;
+            }
+        }
     }
 
     /**

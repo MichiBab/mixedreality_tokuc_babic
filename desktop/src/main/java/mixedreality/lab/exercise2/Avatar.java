@@ -43,7 +43,7 @@ public class Avatar {
     public Avatar() {
         pos = new Vector2f(0, 0);
         rotationAngle = 0;
-        targetPos = null;
+        targetPos = new Vector2f(0, 0);
     }
 
     public Vector2f getPos() {
@@ -67,14 +67,60 @@ public class Avatar {
      * current rotation and p
      */
     protected Matrix3f makePose() {
-        // TODO
-        return Matrix3f.IDENTITY;
+
+        Matrix3f homoMatrix = new Matrix3f();
+        Vector3f positionVector = new Vector3f(pos.x, pos.y, 1);
+        float cos = (float) Math.cos(rotationAngle);
+        float sin = (float) Math.sin(rotationAngle);
+
+        homoMatrix.setRow(0, new Vector3f(cos, sin, 0));
+        homoMatrix.setRow(1, new Vector3f(-sin, cos, 0));
+        homoMatrix.setRow(2, positionVector);
+
+        // third row rotational matrix
+        // homoMatrix.setRow(2, new Vector3f(0, 0, 1));
+
+        return homoMatrix;
     }
 
     /**
      * Move the avatar along the current orientation.
      */
     public void moveToTargetPos() {
-        // TODO
+
+        // direction from pos to target pos
+        Vector2f direction = new Vector2f(targetPos).subtract(pos);
+
+        if (direction.length() < 2 * MOVE_VELOCITY) {
+            return;
+        }
+
+        Vector2f a = direction.normalize();
+        // current orientation
+        Vector2f b = new Vector2f((float) Math.cos(rotationAngle), (float) Math.sin(rotationAngle));
+        // or Vector2f b = getOrientation()
+        float angle = (float) Math.atan2(a.x * b.y - a.y * b.x, a.x * b.x + a.y * b.y);
+
+        if (Math.abs(angle) > Math.PI / 2) {
+            return;
+        }
+        // adjust the orientation
+        float newRotationAngle = rotationAngle + Math.signum(angle) * Math.min(ROTATION_VELOCITY, Math.abs(angle));
+
+        // adjust the position
+        Vector2f newPosition = pos.add(new Vector2f((float) (MOVE_VELOCITY * Math.cos(newRotationAngle)),
+                (float) (MOVE_VELOCITY * Math.sin(newRotationAngle))));
+
+        // update the avatar's state
+        pos = newPosition;
+        rotationAngle = newRotationAngle;
+
+        // float diffDistance = targetPos - pos;
+
+        System.out.println("pos");
+        System.out.println(pos);
+        System.out.println("targetPos");
+        System.out.println(targetPos);
+
     }
 }
