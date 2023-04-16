@@ -241,17 +241,17 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
         float y_pos = spritePos.y;
         float x_target = avatar.getPos().x;
         float y_target = avatar.getPos().y;
-        Vector2f direction_vector = new Vector2f(x_target - x_pos, y_target - y_pos);
-        double angle = Math.atan2(direction_vector.y, direction_vector.x);
-        // add half a pie to get the correct rotation
-        angle += 1.5 * Math.PI;
+        Vector2f direction_vector = new Vector2f(x_pos - x_target, y_pos - y_target);
+        double angle = -Math.atan2(direction_vector.y, direction_vector.x);
+        // subtract pi
+        angle -= Math.PI;
         double cos_angle = Math.cos(angle);
         double sin_angle = Math.sin(angle);
 
         Matrix3f rotationMatrix = new Matrix3f(
-                (float) cos_angle, (float) sin_angle, 0,
-                (float) -sin_angle, (float) cos_angle, 0,
-                x_pos, y_pos, 1);
+                (float) cos_angle, (float) sin_angle, x_pos,
+                (float) -sin_angle, (float) cos_angle, y_pos,
+                0, 0, 1);
         return rotationMatrix;
     }
 }
