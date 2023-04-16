@@ -79,6 +79,7 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
     private void updateGame() {
         // Move avatar into current orientation
         avatar.moveToTargetPos();
+        System.out.println("in2DScene: " + avatar.getPos());
     }
 
     /**
@@ -103,6 +104,7 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
 
         // Draw avatar sprite
         avatarSprite.draw(g, world2Pixel(avatar.getPos()));
+        System.out.println("AvataregtPos2DScne" + avatar.getPos());
 
         // Draw arrow
         Matrix3f pose = getArrowPose(avatar, arrowPos);
