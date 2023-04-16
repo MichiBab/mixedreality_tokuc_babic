@@ -107,10 +107,8 @@ public class Avatar {
                 rotationAngle += rot_size;
             }
         } else {
-
-            pos.x += MOVE_VELOCITY * diff_x / pose_distance;
-            pos.y += MOVE_VELOCITY * diff_y / pose_distance;
-
+            pos.x += Math.min(MOVE_VELOCITY, MOVE_VELOCITY * diff_x / pose_distance);
+            pos.y += Math.min(MOVE_VELOCITY, MOVE_VELOCITY * diff_y / pose_distance);
         }
 
     }
