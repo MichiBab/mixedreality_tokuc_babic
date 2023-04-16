@@ -84,9 +84,46 @@ public class Avatar {
         double diff = (to - from + 360) % 360;
         if (diff > 180) {
             diff = 360 - diff;
-            return -diff;
         }
+
         return diff;
+    }
+
+    public static double calculateWhichDirection(double from, double to) {
+        boolean done = false;
+        int left_counter = 0;
+        int from_i = (int) from;
+        int to_i = (int) to;
+
+        while (!done) {
+            if (to_i == from_i) {
+                break;
+            }
+            if (to_i == 0) {
+                to_i = 360;
+            } else {
+                to_i -= 1;
+            }
+            left_counter += 1;
+        }
+
+        int right_counter = 0;
+        from_i = (int) from;
+        to_i = (int) to;
+
+        while (!done) {
+            if (to_i == from_i) {
+                break;
+            }
+            if (to_i == 360) {
+                to_i = 0;
+            } else {
+                to_i += 1;
+            }
+            right_counter += 1;
+        }
+
+        return left_counter < right_counter ? -1 : 1;
     }
 
     /**
@@ -119,17 +156,15 @@ public class Avatar {
         System.out.println(
                 "wanted: " + theta_deg + "   current: " + rotation_deg + "   diff: " + diff);
 
-        // System.out.println(Math.toDegrees(Math.PI / 2));
         System.out.println(Math.abs(diff) + " > " + 5 + " = " + (Math.abs(diff) > 5));
-        if (diff > 0) {
-            diff -= 180;
-        } else {
-            diff += 180;
-        }
+
         if (Math.abs(diff) > 5) {
-            double step_size = diff % Math.toDegrees(ROTATION_VELOCITY);
+            double step_size = Math.min(Math.toDegrees(ROTATION_VELOCITY), Math.abs(diff));
             System.out.println("step_size: " + step_size);
-            rotationAngle -= Math.toRadians(step_size);
+            rotationAngle += Math.toRadians(step_size * -calculateWhichDirection(rotation_deg, theta_deg));
+
+        } else {
+            System.out.println("Already rotated!");
         }
 
         System.out.println(theta + "   " + rotationAngle);
