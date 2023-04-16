@@ -70,9 +70,9 @@ public class Avatar {
         Matrix3f pose = new Matrix3f();
         float cos_theta = (float) Math.cos(rotationAngle);
         float sin_theta = (float) Math.sin(rotationAngle);
-        pose.setColumn(0, new Vector3f(cos_theta, -sin_theta, pos.x));
-        pose.setColumn(1, new Vector3f(sin_theta, cos_theta, pos.y));
-        pose.setColumn(2, new Vector3f(0, 0, 1));
+        pose.setColumn(0, new Vector3f(cos_theta, -sin_theta, 0));
+        pose.setColumn(1, new Vector3f(sin_theta, cos_theta, 0));
+        pose.setColumn(2, new Vector3f(pos.x, pos.y, 1));
         return pose;
     }
 
@@ -142,8 +142,9 @@ public class Avatar {
         double diff = calculateAngleDifference(rotation_deg, theta_deg);
 
         System.out.println(
-                "wanted: " + theta_deg + "   current: " + rotation_deg + "   diff: " + diff);
+                "wanted: " + theta_deg + " current: " + rotation_deg + " diff: " + diff);
 
+        System.out.println(Math.toDegrees(Math.PI / 2));
         System.out.println(Math.abs(diff) + " > " + 5 + " = " + (Math.abs(diff) > 5));
 
         if (Math.abs(diff) > 5) {
@@ -156,6 +157,8 @@ public class Avatar {
         }
 
         System.out.println(theta + "   " + rotationAngle);
+
+        this.pos = targetPos;
 
         // rotationAngle = rotationAngle - ((theta - rotationAngle) %
         // ROTATION_VELOCITY);
