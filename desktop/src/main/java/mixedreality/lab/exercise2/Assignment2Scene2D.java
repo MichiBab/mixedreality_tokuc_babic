@@ -186,6 +186,7 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
      * Compute the walking animation constant for the current avatar rotation.
      */
     protected Constants.WalkAnimations computeAnimationForOrientation() {
+
         // rad to degree
         Vector2f orientation = avatar.getOrientation();
         float angle = (float) Math.toDegrees(orientation.getAngle());

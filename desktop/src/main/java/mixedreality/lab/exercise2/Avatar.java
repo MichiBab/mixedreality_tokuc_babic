@@ -76,88 +76,41 @@ public class Avatar {
         return pose;
     }
 
-    public static double normalizeRad(double angle) {
-        return ((angle + Math.PI) % (2 * Math.PI)) - Math.PI;
-    }
-
-    public static double calculateAngleDifference(double from, double to) {
-        double diff = (to - from + 360) % 360;
-        if (diff > 180) {
-            diff = 360 - diff;
-        }
-
-        return diff;
-    }
-
-    public static double calculateWhichDirection(double from, double to) {
-        boolean done = false;
-        int left_counter = 0;
-        int from_i = (int) from;
-        int to_i = (int) to;
-
-        while (!done) {
-            if (to_i == from_i) {
-                break;
-            }
-            if (to_i == 0) {
-                to_i = 360;
-            } else {
-                to_i -= 1;
-            }
-            left_counter += 1;
-        }
-
-        if (left_counter < 180) {
-            return -1;
-        }
-        return 1;
-
-    }
-
     /**
      * Move the avatar along the current orientation.
      */
     public void moveToTargetPos() {
-        // print current position and orientation
-        System.out.println("pos: " + pos);
-        System.out.println("orientation: " + getOrientation());
-        // First: rotate to target position
+
         if (targetPos == null) {
             return;
         }
+
+        Vector2f a = getOrientation().normalize();
+        Vector2f b = targetPos.normalize();
+
+        double angle = Math.atan2(a.x * b.y - a.y * b.x, a.x * b.x + a.y * b.y);
+
         float diff_x = targetPos.x - pos.x;
         float diff_y = targetPos.y - pos.y;
-        double theta = Math.atan2(diff_x, diff_y);
-
-        // convert theta to degrees [0; 360]
-        double theta_deg = Math.toDegrees(theta) - 90;
-        if (theta_deg < 0) {
-            theta_deg += 360;
-        }
-        double rotation_deg = Math.toDegrees(rotationAngle);
-        if (rotation_deg < 0) {
-            rotation_deg += 360;
-        }
-
-        double diff = calculateAngleDifference(rotation_deg, theta_deg);
-
-        System.out.println(
-                "wanted: " + theta_deg + " current: " + rotation_deg + " diff: " + diff);
-
         double pose_distance = Math.sqrt(Math.pow(diff_x, 2) + Math.pow(diff_y, 2));
 
-        if (pose_distance < 2.0 * MOVE_VELOCITY) {
-            System.out.println("on goal!");
+        if (pose_distance < 2 * MOVE_VELOCITY) {
+            System.out.println("Already on goal!");
             return;
         }
 
-        if (Math.abs(diff) > Math.toDegrees(Math.PI / 2)) {
-            double step_size = Math.min(Math.toDegrees(ROTATION_VELOCITY), Math.abs(diff));
-            rotationAngle += Math.toRadians(step_size * -calculateWhichDirection(rotation_deg, theta_deg));
+        if (Math.abs(angle) > (Math.PI / 2)) {
+            double rot_size = Math.min(ROTATION_VELOCITY, Math.abs(angle));
+            if (angle > 0) {
+                rotationAngle -= rot_size;
+            } else if (angle < 0) {
+                rotationAngle += rot_size;
+            }
         } else {
-            // calculate pose distance
+
             pos.x += MOVE_VELOCITY * diff_x / pose_distance;
             pos.y += MOVE_VELOCITY * diff_y / pose_distance;
+
         }
 
     }
