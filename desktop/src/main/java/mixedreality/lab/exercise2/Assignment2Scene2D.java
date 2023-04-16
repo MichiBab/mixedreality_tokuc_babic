@@ -247,9 +247,9 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
         double sin_angle = Math.sin(angle);
 
         Matrix3f rotationMatrix = new Matrix3f(
-                (float) cos_angle, (float) sin_angle, x_pos,
-                (float) -sin_angle, (float) cos_angle, y_pos,
-                0, 0, 1);
+                (float) cos_angle, (float) sin_angle, 0,
+                (float) -sin_angle, (float) cos_angle, 0,
+                x_pos, y_pos, 1);
         return rotationMatrix;
     }
 }

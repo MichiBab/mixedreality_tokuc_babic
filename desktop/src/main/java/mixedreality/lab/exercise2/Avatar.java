@@ -70,9 +70,9 @@ public class Avatar {
         Matrix3f pose = new Matrix3f();
         float cos_theta = (float) Math.cos(rotationAngle);
         float sin_theta = (float) Math.sin(rotationAngle);
-        pose.setColumn(0, new Vector3f(cos_theta, -sin_theta, pos.x));
-        pose.setColumn(1, new Vector3f(sin_theta, cos_theta, pos.y));
-        pose.setColumn(2, new Vector3f(0, 0, 1));
+        pose.setColumn(0, new Vector3f(cos_theta, -sin_theta, 0));
+        pose.setColumn(1, new Vector3f(sin_theta, cos_theta, 0));
+        pose.setColumn(2, new Vector3f(pos.x, pos.y, 1));
         return pose;
     }
 
@@ -144,23 +144,21 @@ public class Avatar {
         System.out.println(
                 "wanted: " + theta_deg + "   current: " + rotation_deg + "   diff: " + diff);
 
-        System.out.println(Math.abs(diff) + " > " + 5 + " = " + (Math.abs(diff) > 5));
+        double pose_distance = Math.sqrt(Math.pow(diff_x, 2) + Math.pow(diff_y, 2));
 
-        if (Math.abs(diff) > 5) {
-            double step_size = Math.min(Math.toDegrees(ROTATION_VELOCITY), Math.abs(diff));
-            System.out.println("step_size: " + step_size);
-            rotationAngle += Math.toRadians(step_size * -calculateWhichDirection(rotation_deg, theta_deg));
-
-        } else {
-            System.out.println("Already rotated!");
+        if (pose_distance < 2.0 * MOVE_VELOCITY) {
+            System.out.println("on goal!");
+            return;
         }
 
-        System.out.println(theta + "   " + rotationAngle);
-
-        // rotationAngle = rotationAngle - ((theta - rotationAngle) %
-        // ROTATION_VELOCITY);
-        // pos.x += MOVE_VELOCITY;
-        // pos.y += MOVE_VELOCITY;
+        if (Math.abs(diff) > Math.toDegrees(Math.PI / 2)) {
+            double step_size = Math.min(Math.toDegrees(ROTATION_VELOCITY), Math.abs(diff));
+            rotationAngle += Math.toRadians(step_size * -calculateWhichDirection(rotation_deg, theta_deg));
+        } else {
+            // calculate pose distance
+            pos.x += MOVE_VELOCITY * diff_x / pose_distance;
+            pos.y += MOVE_VELOCITY * diff_y / pose_distance;
+        }
 
     }
 
