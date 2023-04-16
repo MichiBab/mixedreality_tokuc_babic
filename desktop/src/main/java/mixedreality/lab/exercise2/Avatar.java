@@ -107,23 +107,11 @@ public class Avatar {
             left_counter += 1;
         }
 
-        int right_counter = 0;
-        from_i = (int) from;
-        to_i = (int) to;
-
-        while (!done) {
-            if (to_i == from_i) {
-                break;
-            }
-            if (to_i == 360) {
-                to_i = 0;
-            } else {
-                to_i += 1;
-            }
-            right_counter += 1;
+        if (left_counter < 180) {
+            return -1;
         }
+        return 1;
 
-        return left_counter < right_counter ? -1 : 1;
     }
 
     /**
