@@ -142,7 +142,7 @@ public class Avatar {
         double diff = calculateAngleDifference(rotation_deg, theta_deg);
 
         System.out.println(
-                "wanted: " + theta_deg + "   current: " + rotation_deg + "   diff: " + diff);
+                "wanted: " + theta_deg + " current: " + rotation_deg + " diff: " + diff);
 
         double pose_distance = Math.sqrt(Math.pow(diff_x, 2) + Math.pow(diff_y, 2));
 
