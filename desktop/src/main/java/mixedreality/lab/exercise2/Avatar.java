@@ -151,14 +151,13 @@ public class Avatar {
             return;
         }
 
-        if (Math.abs(diff) > Math.toDegrees(Math.PI / 2)) {
+        if (Math.abs(diff) > 10) {
             double step_size = Math.min(Math.toDegrees(ROTATION_VELOCITY), Math.abs(diff));
             rotationAngle += Math.toRadians(step_size * -calculateWhichDirection(rotation_deg, theta_deg));
-        } else {
-            // calculate pose distance
-            pos.x += MOVE_VELOCITY * diff_x / pose_distance;
-            pos.y += MOVE_VELOCITY * diff_y / pose_distance;
         }
+        // calculate pose distance
+        pos.x += MOVE_VELOCITY * diff_x / pose_distance;
+        pos.y += MOVE_VELOCITY * diff_y / pose_distance;
 
     }
 
