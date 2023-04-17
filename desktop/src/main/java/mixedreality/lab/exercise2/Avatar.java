@@ -93,13 +93,19 @@ public class Avatar {
         boolean done = false;
         int left_counter = 0;
         int from_i = (int) from;
+        while (from_i < 0) {
+            from_i += 360;
+        }
         int to_i = (int) to;
+        while (to_i <= 0) {
+            from_i += 360;
+        }
 
         while (!done) {
             if (to_i == from_i) {
                 break;
             }
-            if (to_i == 0) {
+            if (to_i == -1) {
                 to_i = 360;
             } else {
                 to_i -= 1;
