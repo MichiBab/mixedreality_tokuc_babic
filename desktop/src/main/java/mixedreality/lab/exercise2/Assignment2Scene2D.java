@@ -186,25 +186,49 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
      * Compute the walking animation constant for the current avatar rotation.
      */
     protected Constants.WalkAnimations computeAnimationForOrientation() {
-        // rad to degree
-        Vector2f orientation = avatar.getOrientation();
-        float angle = (float) Math.toDegrees(orientation.getAngle());
-        // round to 0-360
-        // 90 degrees is north, 0 degrees is east
-        angle = (angle + 360) % 360;
-        System.out.println(angle);
 
-        // if angle is between 45 and 135, return north. If it is between 135 and 225,
-        // return west, etc.
-        if (angle >= 45 && angle < 135) {
-            return Constants.WalkAnimations.WALK_N;
-        } else if (angle >= 135 && angle < 225) {
-            return Constants.WalkAnimations.WALK_W;
-        } else if (angle >= 225 && angle < 315) {
-            return Constants.WalkAnimations.WALK_S;
+        float diffX = avatar.targetPos.x - avatar.pos.x;
+        float diffY = avatar.targetPos.y - avatar.pos.y;
+
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            // x axis
+            if (diffX > 0) {
+                // right
+                return Constants.WalkAnimations.WALK_E;
+            } else {
+                // left
+                return Constants.WalkAnimations.WALK_W;
+            }
         } else {
-            return Constants.WalkAnimations.WALK_E;
+            // y axis
+            if (diffY > 0) {
+                // up
+                return Constants.WalkAnimations.WALK_N;
+            } else {
+                // down
+                return Constants.WalkAnimations.WALK_S;
+            }
         }
+        // // rad to degree
+        // Vector2f orientation = avatar.getOrientation();
+        // float angle = (float) Math.toDegrees(orientation.getAngle());
+        // // round to 0-360
+        // // 90 degrees is north, 0 degrees is east
+        // angle = (angle + 360) % 360;
+        // System.out.println(angle);
+
+        // // if angle is between 45 and 135, return north. If it is between 135 and
+        // 225,
+        // // return west, etc.
+        // if (angle >= 45 && angle < 135) {
+        // return Constants.WalkAnimations.WALK_N;
+        // } else if (angle >= 135 && angle < 225) {
+        // return Constants.WalkAnimations.WALK_W;
+        // } else if (angle >= 225 && angle < 315) {
+        // return Constants.WalkAnimations.WALK_S;
+        // } else {
+        // return Constants.WalkAnimations.WALK_E;
+        // }
         /*
          * // if angle is between 67.5 and 112.5, return north. If it is between 112.5
          * and
