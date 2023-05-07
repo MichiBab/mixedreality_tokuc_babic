@@ -92,6 +92,8 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
 
     @Override
     public void paint(Graphics g) {
+	//clear previous Graphics
+	g.clearRect(0, 0, getWidth(), getHeight());
 
         // Draw target
         if (mousePosInScene != null) {
