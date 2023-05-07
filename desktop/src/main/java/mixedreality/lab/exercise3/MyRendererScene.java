@@ -51,8 +51,8 @@ public class MyRendererScene extends Scene2D {
     lastMousePosition = null;
 
     ObjReader reader = new ObjReader();
-    mesh = reader.read("models/cube.obj");
-    // mesh = reader.read("Models/deer.obj");
+    // mesh = reader.read("models/cube.obj");
+    mesh = reader.read("models/deer.obj");
 
     setupListeners();
   }
@@ -134,12 +134,11 @@ public class MyRendererScene extends Scene2D {
 
   private void drawImage(Graphics2D g2, Vector4f[] transforms) {
     for (int i = 0; i < mesh.getNumberOfTriangles(); i++) {
-      Vector4f[] points = new Vector4f[] {
-          transforms[mesh.getTriangle(i).getA()],
-          transforms[mesh.getTriangle(i).getB()],
-          transforms[mesh.getTriangle(i).getC()] };
-      if (calcAllowedToDraw(points)) {
-        drawLinesBetweenPoints(g2, points);
+      Vector4f p1 = transforms[mesh.getTriangle(i).getA()];
+      Vector4f p2 = transforms[mesh.getTriangle(i).getB()];
+      Vector4f p3 = transforms[mesh.getTriangle(i).getC()];
+      if (calcAllowedToDraw(p1, p2, p3)) {
+        drawLinesBetweenPoints(g2, new Vector4f[] { p1, p2, p3 });
       }
     }
   }
@@ -152,17 +151,13 @@ public class MyRendererScene extends Scene2D {
     }
   }
 
-  private boolean calcAllowedToDraw(Vector4f[] points) {
+  private boolean calcAllowedToDraw(Vector4f p1, Vector4f p2, Vector4f p3) {
     if (!backfaceCulling) {
       return true;
     }
-    float signedArea = 0;
-    for (int i = 0; i < points.length; i++) {
-      Vector4f p1 = points[i];
-      Vector4f p2 = points[(i + 1) % points.length];
-      signedArea += (p2.x - p1.x) * (p2.y + p1.y);
-    }
-    return signedArea > 0;
+    Vector2f first = new Vector2f((p2.getX() - p1.getX()), (p2.getY() - p1.getY()));
+    Vector2f second = new Vector2f((p3.getX() - p2.getX()), (p3.getY() - p2.getY()));
+    return first.cross(second).z > 0;
   }
 
   @Override
