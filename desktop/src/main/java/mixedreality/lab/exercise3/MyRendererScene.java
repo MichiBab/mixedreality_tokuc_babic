@@ -7,8 +7,11 @@
 package mixedreality.lab.exercise3;
 
 import com.jme3.math.FastMath;
+import com.jme3.math.Matrix4f;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.math.Vector4f;
+
 import mixedreality.base.mesh.ObjReader;
 import mixedreality.base.mesh.TriangleMesh;
 import ui.Scene2D;
@@ -42,14 +45,14 @@ public class MyRendererScene extends Scene2D {
   public MyRendererScene(int width, int height) {
     super(width, height);
     camera = new Camera(new Vector3f(0, 0, -2), new Vector3f(0, 0, 0),
-            new Vector3f(0, 1, 0), 90.0f / 180.0f * FastMath.PI, 1,
-            width, height);
+        new Vector3f(0, 1, 0), 90.0f / 180.0f * FastMath.PI, 1,
+        width, height);
     backfaceCulling = true;
     lastMousePosition = null;
 
     ObjReader reader = new ObjReader();
     mesh = reader.read("models/cube.obj");
-    //mesh = reader.read("Models/deer.obj");
+    // mesh = reader.read("Models/deer.obj");
 
     setupListeners();
   }
@@ -57,10 +60,109 @@ public class MyRendererScene extends Scene2D {
   @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
+    g.clearRect(0, 0, getWidth(), getHeight());
 
     if (mesh != null) {
-      // TODO: Draw the mesh here
+      handlePaint(g2);
     }
+
+  }
+
+  private void handlePaint(Graphics2D g2) {
+    int verticesCount = mesh.getNumberOfVertices();
+    Vector4f[] transformedVertices = new Vector4f[verticesCount];
+    // Model Transformation (Identity matrix)
+    Matrix4f M = new Matrix4f();
+    // View Transformation Matrix V
+    Matrix4f V = camera.makeCameraMatrix().invert();
+    // Projektionsmatrix P
+    Matrix4f P = new Matrix4f(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 1.0f / camera.getZ0(), 0);
+    // Pixel Transformation/Screen Mapping Matrix K
+    float foX = (float) (getWidth() / (2 * Math.tan(camera.getFovX() / 2)));
+    float foY = (float) (getHeight() / (2 * Math.tan(camera.getFovY() / 2)));
+    Matrix4f K = new Matrix4f(
+        foX, 0, 0, getWidth() / 2,
+        0, foY, 0, getHeight() / 2,
+        0, 0, 0, 0,
+        0, 0, 0, 0);
+    // Für jeden Vertice, Transformationen durchführen
+    for (int i = 0; i < verticesCount; i++) {
+      // auf 4d bringen
+      Vector3f vertexVector = mesh.getVertex(i).getPosition();
+      Vector4f vertexPosition = new Vector4f(vertexVector.x, vertexVector.y, vertexVector.z, 1.0f);
+      vertexPosition = modelTransformation(M, vertexPosition);
+      vertexPosition = viewTransformation(V, vertexPosition);
+      vertexPosition = perspectiveTransformation(P, vertexPosition);
+      vertexPosition = pixelTransformation(K, vertexPosition);
+      // Update entries
+      transformedVertices[i] = vertexPosition;
+    }
+
+    drawImage(g2, transformedVertices);
+  }
+
+  private Vector4f modelTransformation(Matrix4f M, Vector4f p) {
+    // Von lokalem Koordinatensystem in Weltkoordinatensystem transformieren
+    // Pwelt = M * p
+    return M.mult(p);
+  }
+
+  private Vector4f viewTransformation(Matrix4f V, Vector4f p_welt) {
+    // Transformiere alle Objekte der Szene in das Kamerakoordinatensystem. Z Achse
+    // Koordinatensystem mit Z Achse der Kamera richten. Kamera soll im Ursprung
+    // sein und auf die Z Achse blicken
+    // Pcam = V * Pwelt
+    return V.mult(p_welt);
+  }
+
+  private Vector4f perspectiveTransformation(Matrix4f P, Vector4f p_cam) {
+    // Pbild_tmp = P * Pcam
+    // P_bild = Pbild_tmp / Pbild_tmp.w
+    Vector4f P_bild = P.mult(p_cam);
+    return P_bild.divide(P_bild.w);
+  }
+
+  private Vector4f pixelTransformation(Matrix4f K, Vector4f p_bild) {
+    // Pixel Transformation
+    // pbild = K * pbild
+    return K.mult(p_bild);
+  }
+
+  private void drawImage(Graphics2D g2, Vector4f[] transforms) {
+    for (int i = 0; i < mesh.getNumberOfTriangles(); i++) {
+      Vector4f[] points = new Vector4f[] {
+          transforms[mesh.getTriangle(i).getA()],
+          transforms[mesh.getTriangle(i).getB()],
+          transforms[mesh.getTriangle(i).getC()] };
+      if (calcAllowedToDraw(points)) {
+        drawLinesBetweenPoints(g2, points);
+      }
+    }
+  }
+
+  private void drawLinesBetweenPoints(Graphics2D g2, Vector4f[] points) {
+    for (int i = 0; i < points.length; i++) {
+      Vector4f p1 = points[i];
+      Vector4f p2 = points[(i + 1) % points.length]; // automatically connect last point with first point
+      drawLine(g2, new Vector2f(p1.x, p1.y), new Vector2f(p2.x, p2.y), Color.BLACK);
+    }
+  }
+
+  private boolean calcAllowedToDraw(Vector4f[] points) {
+    if (!backfaceCulling) {
+      return true;
+    }
+    float signedArea = 0;
+    for (int i = 0; i < points.length; i++) {
+      Vector4f p1 = points[i];
+      Vector4f p2 = points[(i + 1) % points.length];
+      signedArea += (p2.x - p1.x) * (p2.y + p1.y);
+    }
+    return signedArea > 0;
   }
 
   @Override
@@ -126,5 +228,7 @@ public class MyRendererScene extends Scene2D {
         lastMousePosition = null;
       }
     });
+
   }
+
 }
