@@ -7,8 +7,11 @@
 package mixedreality.lab.exercise3;
 
 import com.jme3.math.FastMath;
+import com.jme3.math.Matrix4f;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.math.Vector4f;
+
 import mixedreality.base.mesh.ObjReader;
 import mixedreality.base.mesh.TriangleMesh;
 import ui.Scene2D;
@@ -42,14 +45,16 @@ public class MyRendererScene extends Scene2D {
   public MyRendererScene(int width, int height) {
     super(width, height);
     camera = new Camera(new Vector3f(0, 0, -2), new Vector3f(0, 0, 0),
-            new Vector3f(0, 1, 0), 90.0f / 180.0f * FastMath.PI, 1,
-            width, height);
+        new Vector3f(0, 1, 0), 90.0f / 180.0f * FastMath.PI, 1,
+        width, height);
     backfaceCulling = true;
     lastMousePosition = null;
 
     ObjReader reader = new ObjReader();
-    mesh = reader.read("models/cube.obj");
-    //mesh = reader.read("Models/deer.obj");
+
+    mesh = reader
+        .read("models/deer.obj");
+    // mesh = reader.read("Models/deer.obj");
 
     setupListeners();
   }
@@ -57,9 +62,74 @@ public class MyRendererScene extends Scene2D {
   @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
+    // clear(g2);
 
     if (mesh != null) {
-      // TODO: Draw the mesh here
+      int verticesCount = mesh.getNumberOfVertices();
+      Vector4f[] transformedVertices = new Vector4f[verticesCount];
+      // Model Transformation (Identity matrix)
+      Matrix4f M = new Matrix4f();
+
+      // View Transformation Matrix V
+      Matrix4f cameraMatrix = camera.makeCameraMatrix();
+      Matrix4f V = cameraMatrix.invert();
+      // pcam = V * pwelt
+
+      // Projektionsmatrix P
+      Matrix4f P = new Matrix4f(
+          1, 0, 0, 0,
+          0, 1, 0, 0,
+          0, 0, 1, 0,
+          0, 0, 1.0f / camera.getZ0(), 0);
+
+      // pbild = p * pcam
+      System.out.println("Matrix P:" + P);
+
+      // Pixel Transformation/Screen Mapping Matrix K
+      float focalLengthX = (float) (getWidth() / (2 * Math.tan(camera.getFovX() / 2)));
+      float focalLengthY = (float) (getHeight() / (2 * Math.tan(camera.getFovY() / 2)));
+      Matrix4f K = new Matrix4f(
+          focalLengthX, 0, 0, getWidth() / 2,
+          0, focalLengthY, 0, getHeight() / 2,
+          0, 0, 0, 0,
+          0, 0, 0, 0);
+
+      // Transformation Routine
+      for (int i = 0; i < verticesCount; i++) {
+        // erweitern um w, von 3d auf 4d hoch
+        Vector3f vertexVector = mesh.getVertex(i).getPosition();
+        Vector4f vertexPosition = new Vector4f(vertexVector.x, vertexVector.y, vertexVector.z, 1.0f);
+        // Model Transformation
+        // pwelt = M · p
+        Vector4f vertexPositionTransformed = M.mult(vertexPosition);
+        transformedVertices[i] = vertexPositionTransformed;
+
+        // View Transformation
+        transformedVertices[i] = V.mult(transformedVertices[i]);
+
+        // Projection
+        vertexPositionTransformed = P.mult(transformedVertices[i]);
+        vertexPositionTransformed = vertexPositionTransformed.divide(vertexPositionTransformed.w);
+        transformedVertices[i] = vertexPositionTransformed;
+
+        // Pixel Transformation
+        transformedVertices[i] = K.mult(transformedVertices[i]);
+      }
+
+      // Drawing
+      for (int i = 0; i < mesh.getNumberOfTriangles(); i++) {
+        Vector4f A = transformedVertices[mesh.getTriangle(i).getA()]; // 0, 3
+        Vector4f B = transformedVertices[mesh.getTriangle(i).getB()]; // 1, 4
+        Vector4f C = transformedVertices[mesh.getTriangle(i).getC()]; // 2, 5
+        // normale welche richtung?
+        if (backfaceCulling) {
+          if (isClockwiseOrientated(A, B, C)) {
+            drawTriangle(g2, A, B, C);
+          }
+        } else {
+          drawTriangle(g2, A, B, C);
+        }
+      }
     }
   }
 
@@ -126,5 +196,31 @@ public class MyRendererScene extends Scene2D {
         lastMousePosition = null;
       }
     });
+  }
+
+  private boolean isClockwiseOrientated(Vector4f p1, Vector4f p2, Vector4f p3) {
+    // fläche berechnen: wenn negativ, schaut er auf uns zu, wenn positiv schaut weg
+    // (oder andersrum, debuggen)
+    return calculateSignedAreaOfParallelogram(p1, p2, p3) < 0;
+  }
+
+  private float calculateSignedAreaOfParallelogram(Vector4f p1, Vector4f p2, Vector4f p3) {
+
+    Vector2f first = new Vector2f((p2.getX() - p1.getX()), (p2.getY() - p1.getY()));
+    Vector2f second = new Vector2f((p3.getX() - p2.getX()), (p3.getY() - p2.getY()));
+
+    float cross = first.cross(second).z;
+    System.out.println("kreuz" + cross);
+    // in vorlesungsfolie finden
+    return cross;
+  }
+
+  /**
+   * Draw a triangle using the given coordinates.
+   */
+  private void drawTriangle(Graphics2D g2, Vector4f A, Vector4f B, Vector4f C) {
+    drawLine(g2, new Vector2f(A.x, A.y), new Vector2f(B.x, B.y), Color.BLACK);
+    drawLine(g2, new Vector2f(A.x, A.y), new Vector2f(C.x, C.y), Color.BLACK);
+    drawLine(g2, new Vector2f(B.x, B.y), new Vector2f(C.x, C.y), Color.BLACK);
   }
 }
