@@ -7,6 +7,7 @@
 package mixedreality.lab.exercise4;
 
 import com.jme3.math.Matrix3f;
+import com.jme3.math.Matrix4f;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import misc.Logger;
@@ -63,29 +64,29 @@ public class QuadricErrorMetricsSimplification2D {
     }
 
     // Debugging: distance matrices
-//    for (int i = 0; i < polygon.getNumPoints(); i++) {
-//      PolygonVertex vertex = polygon.getPoint(i);
-//      PolygonEdge edge = vertex.getIncomingEdge();
-//      Matrix3f Q = computeDistanceMatrix(edge);
-//      System.out.println("Distance matrix for " + edge);
-//      System.out.println(Q);
-//    }
+    // for (int i = 0; i < polygon.getNumPoints(); i++) {
+    // PolygonVertex vertex = polygon.getPoint(i);
+    // PolygonEdge edge = vertex.getIncomingEdge();
+    // Matrix3f Q = computeDistanceMatrix(edge);
+    // System.out.println("Distance matrix for " + edge);
+    // System.out.println(Q);
+    // }
 
     // Debugging: vertex QEMs
-//    for (int i = 0; i < polygon.getNumPoints(); i++) {
-//      PolygonVertex vertex = polygon.getPoint(i);
-//      Matrix3f Q = computePointQem(vertex);
-//      System.out.println("QEM for vertex " + vertex);
-//      System.out.println(Q);
-//    }
+    // for (int i = 0; i < polygon.getNumPoints(); i++) {
+    // PolygonVertex vertex = polygon.getPoint(i);
+    // Matrix3f Q = computePointQem(vertex);
+    // System.out.println("QEM for vertex " + vertex);
+    // System.out.println(Q);
+    // }
 
     // Debugging: edge QEMs
-//    for (int i = 0; i < polygon.getNumPoints(); i++) {
-//      PolygonEdge edge = polygon.getEdge(i);
-//      EdgeCollapse edgeCollapse = computeEdgeCollapseResult(edge);
-//      System.out.println("QEM for edge " + edge);
-//      System.out.println(edgeCollapse);
-//    }
+    // for (int i = 0; i < polygon.getNumPoints(); i++) {
+    // PolygonEdge edge = polygon.getEdge(i);
+    // EdgeCollapse edgeCollapse = computeEdgeCollapseResult(edge);
+    // System.out.println("QEM for edge " + edge);
+    // System.out.println(edgeCollapse);
+    // }
 
   }
 
@@ -93,29 +94,58 @@ public class QuadricErrorMetricsSimplification2D {
    * Computes the initial QEM for an edge.
    */
   protected Matrix3f computeDistanceMatrix(PolygonEdge edge) {
+    // Calculate the distancematrix between edge.start and edge.end
+    PolygonVertex start = edge.getStartVertex();
+    PolygonVertex end = edge.getEndVertex();
+    Vector2f startVec = start.getPosition();
+    Vector2f endVec = end.getPosition();
 
-    // TODO
-
-    return new Matrix3f();
+    Vector2f edgeVec = endVec.subtract(startVec);
+    edgeVec = new Vector2f(edgeVec.y, -1 * edgeVec.x).normalize();
+    // Z achse stellt abstand von der kante zum ursprung dar, um die richtung zu
+    // erhalten
+    Vector3f edgeVec3 = new Vector3f(edgeVec.x, edgeVec.y, -1 * edgeVec.dot(startVec));
+    return dyadic(edgeVec3, edgeVec3);
   }
 
   protected Matrix3f computePointQem(PolygonVertex v) {
-
-    // TODO
-
-    return new Matrix3f();
+    // Die QEM für einen Punkt ist die Summe der QEMs aller Kanten, die an dem Punkt
+    // anliegen
+    Matrix3f Q = new Matrix3f(0, 0, 0, 0, 0, 00, 0, 0, 0);
+    for (PolygonEdge edge : getIncidentEdges(v)) {
+      Q = add(Q, computeDistanceMatrix(edge));
+    }
+    return Q;
   }
 
   /**
-   * Compute the result if the edge is collaped - this is used in the priority queue to select the next edge to
+   * Compute the result if the edge is collaped - this is used in the priority
+   * queue to select the next edge to
    * collapse.
    */
   protected EdgeCollapse computeEdgeCollapseResult(PolygonEdge edge) {
+    PolygonVertex start = edge.getStartVertex();
+    PolygonVertex end = edge.getEndVertex();
 
-    // TODO
+    // Ableitungsmatrix der Fehlerquadrik
+    Matrix3f errorQuadric = add(computePointQem(start), computePointQem(end));
+    // Invertierte Ableitungsmatrix
+    Matrix3f errorQuadricEdgeDerivativeInverted = errorQuadric.clone().setRow(2, new Vector3f(0, 0, 1)).invert();
 
-    Vector2f midPoint = edge.getStartVertex().getPosition().add(edge.getEndVertex().getPosition()).mult(0.5f);
-    return new EdgeCollapse(-1, new Matrix3f(), midPoint);
+    Vector3f newPosition;
+    if (!errorQuadricEdgeDerivativeInverted.equals(Matrix3f.ZERO)) {
+      // Die invertierte Ableitungsmatrix repräsentiert die partiellen Ableitungen der
+      // Fehlerquadrik nach den Koordinaten der Kante. Durch die Multiplikation mit
+      // der invertierten Ableitungsmatrix erhalten wir die optimale z-Koordinate für
+      // die Kollabierung der Kante
+      newPosition = errorQuadricEdgeDerivativeInverted.mult(new Vector3f(0, 0, 1));
+    } else {
+      newPosition = convert2to3(start.getPosition().add(end.getPosition()).divide(2));
+    }
+    // Error bestimmt durch das Skalarprodukt von newPosition und errorQuadric
+    // eingesetzt mit der newPosition
+    float error = newPosition.dot(errorQuadric.mult(newPosition));
+    return new EdgeCollapse(error, errorQuadric, convert3to2(newPosition));
   }
 
   protected PolygonVertex collapse(PolygonEdge edge, Vector2f newPos) {

@@ -54,14 +54,17 @@ public class SimplificationScene extends Scene2D {
     polygon.readFromFile((String) cbPoly.getSelectedItem());
     BoundingBox2D bbox2D = polygon.getBBox();
     setRenderArea(bbox2D.getLL().subtract(new Vector2f(0.5f, 0.5f)),
-            bbox2D.getUR().add(new Vector2f(0.5f, 0.5f)));
+        bbox2D.getUR().add(new Vector2f(0.5f, 0.5f)));
     qem.reset();
     repaint();
   }
 
   @Override
   public void paint(Graphics g) {
+    g.clearRect(0, 0, getWidth(), getHeight());
+
     Graphics2D g2 = (Graphics2D) g;
+
     Font oldFont = g2.getFont();
     Font font = new Font("Courier New", oldFont.getStyle(), 9);
     g2.setFont(font);
@@ -166,7 +169,7 @@ public class SimplificationScene extends Scene2D {
    */
   private void drawVertex(Graphics2D g2, PolygonVertex v) {
     drawPoint(g2, v.getPosition(), Color.BLUE);
-    //displayQEM(g2, v.getPosition(), simplification2D.getQEM4Vertex(v));
+    // displayQEM(g2, v.getPosition(), simplification2D.getQEM4Vertex(v));
     displayPos(g2, v.getPosition());
   }
 
