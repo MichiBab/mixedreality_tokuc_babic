@@ -32,7 +32,7 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
      */
     private AnimatedSprite avatarSprite;
 
-    //private final Sprite staticSprite;
+    // private final Sprite staticSprite;
 
     /**
      * This class controls the behavior of the avatar
@@ -73,7 +73,8 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
     }
 
     /**
-     * This method is called once before rendering and is used to update the game state.
+     * This method is called once before rendering and is used to update the game
+     * state.
      */
     private void updateGame() {
         // Move avatar into current orientation
@@ -124,37 +125,33 @@ public class Assignment2Scene2D extends Scene2D implements MouseListener {
     private void loadAvatarSprite() {
         SpriteAnimationImporter.ImportParams[] importParams = {
                 new SpriteAnimationImporter.ImportParams(
-                        "sprites/character_sprites.png",
+                        "desktop/src/main/resources/sprites/character_sprites.png",
                         WALK_ANIMATION_IDS[Constants.WalkAnimations.WALK_S.ordinal()],
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 10),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                ),
+                        9, false),
                 new SpriteAnimationImporter.ImportParams(
-                        "sprites/character_sprites.png",
+                        "desktop/src/main/resources/sprites/character_sprites.png",
                         WALK_ANIMATION_IDS[Constants.WalkAnimations.WALK_W.ordinal()],
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 9),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                ),
+                        9, false),
                 new SpriteAnimationImporter.ImportParams(
-                        "sprites/character_sprites.png",
+                        "desktop/src/main/resources/sprites/character_sprites.png",
                         WALK_ANIMATION_IDS[Constants.WalkAnimations.WALK_N.ordinal()],
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 8),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                ),
+                        9, false),
                 new SpriteAnimationImporter.ImportParams(
-                        "sprites/character_sprites.png",
+                        "desktop/src/main/resources/sprites/character_sprites.png",
                         WALK_ANIMATION_IDS[Constants.WalkAnimations.WALK_E.ordinal()],
                         64, 64,
                         new SpriteAnimationImporter.Idx(0, 11),
                         SpriteAnimationImporter.Orientation.HORIZONTAL,
-                        9, false
-                )
+                        9, false)
         };
         avatarSprite = SpriteAnimationImporter.importAnimatedSprite(importParams);
     }

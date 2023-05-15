@@ -51,10 +51,8 @@ public class MyRendererScene extends Scene2D {
     lastMousePosition = null;
 
     ObjReader reader = new ObjReader();
-
-    mesh = reader
-        .read("models/deer.obj");
-    // mesh = reader.read("Models/deer.obj");
+    // mesh = reader.read("models/cube.obj");
+    mesh = reader.read("models/deer.obj");
 
     setupListeners();
   }
@@ -62,75 +60,104 @@ public class MyRendererScene extends Scene2D {
   @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
-    // clear(g2);
+    g.clearRect(0, 0, getWidth(), getHeight());
 
     if (mesh != null) {
-      int verticesCount = mesh.getNumberOfVertices();
-      Vector4f[] transformedVertices = new Vector4f[verticesCount];
-      // Model Transformation (Identity matrix)
-      Matrix4f M = new Matrix4f();
+      handlePaint(g2);
+    }
 
-      // View Transformation Matrix V
-      Matrix4f cameraMatrix = camera.makeCameraMatrix();
-      Matrix4f V = cameraMatrix.invert();
-      // pcam = V * pwelt
+  }
 
-      // Projektionsmatrix P
-      Matrix4f P = new Matrix4f(
-          1, 0, 0, 0,
-          0, 1, 0, 0,
-          0, 0, 1, 0,
-          0, 0, 1.0f / camera.getZ0(), 0);
+  private void handlePaint(Graphics2D g2) {
+    int verticesCount = mesh.getNumberOfVertices();
+    Vector4f[] transformedVertices = new Vector4f[verticesCount];
+    // Model Transformation (Identity matrix)
+    Matrix4f M = new Matrix4f();
+    // View Transformation Matrix V
+    Matrix4f V = camera.makeCameraMatrix().invert();
+    // Projektionsmatrix P
+    Matrix4f P = new Matrix4f(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 1.0f / camera.getZ0(), 0);
+    // Pixel Transformation/Screen Mapping Matrix K
+    float foX = (float) (getWidth() / (2 * Math.tan(camera.getFovX() / 2)));
+    float foY = (float) (getHeight() / (2 * Math.tan(camera.getFovY() / 2)));
+    Matrix4f K = new Matrix4f(
+        foX, 0, 0, getWidth() / 2,
+        0, foX, 0, getHeight() / 2,
+        0, 0, 0, 0,
+        0, 0, 0, 0);
+    // Für jeden Vertice, Transformationen durchführen
+    for (int i = 0; i < verticesCount; i++) {
+      // auf 4d bringen
+      Vector3f vertexVector = mesh.getVertex(i).getPosition();
+      Vector4f vertexPosition = new Vector4f(vertexVector.x, vertexVector.y, vertexVector.z, 1.0f);
+      vertexPosition = modelTransformation(M, vertexPosition);
+      vertexPosition = viewTransformation(V, vertexPosition);
+      vertexPosition = perspectiveTransformation(P, vertexPosition);
+      vertexPosition = pixelTransformation(K, vertexPosition);
+      // Update entries
+      transformedVertices[i] = vertexPosition;
+    }
 
-      // pbild = p * pcam
-      System.out.println("Matrix P:" + P);
+    drawImage(g2, transformedVertices);
+  }
 
-      // Pixel Transformation/Screen Mapping Matrix K
-      float focalLengthX = (float) (getWidth() / (2 * Math.tan(camera.getFovX() / 2)));
-      float focalLengthY = (float) (getHeight() / (2 * Math.tan(camera.getFovY() / 2)));
-      Matrix4f K = new Matrix4f(
-          focalLengthX, 0, 0, getWidth() / 2,
-          0, focalLengthY, 0, getHeight() / 2,
-          0, 0, 0, 0,
-          0, 0, 0, 0);
+  private Vector4f modelTransformation(Matrix4f M, Vector4f p) {
+    // Von lokalem Koordinatensystem in Weltkoordinatensystem transformieren
+    // Pwelt = M * p
+    return M.mult(p);
+  }
 
-      // Transformation Routine
-      for (int i = 0; i < verticesCount; i++) {
-        // erweitern um w, von 3d auf 4d hoch
-        Vector3f vertexVector = mesh.getVertex(i).getPosition();
-        Vector4f vertexPosition = new Vector4f(vertexVector.x, vertexVector.y, vertexVector.z, 1.0f);
-        // Model Transformation
-        // pwelt = M · p
-        Vector4f vertexPositionTransformed = M.mult(vertexPosition);
-        transformedVertices[i] = vertexPositionTransformed;
+  private Vector4f viewTransformation(Matrix4f V, Vector4f p_welt) {
+    // Transformiere alle Objekte der Szene in das Kamerakoordinatensystem. Z Achse
+    // Koordinatensystem mit Z Achse der Kamera richten. Kamera soll im Ursprung
+    // sein und auf die Z Achse blicken
+    // Pcam = V * Pwelt
+    return V.mult(p_welt);
+  }
 
-        // View Transformation
-        transformedVertices[i] = V.mult(transformedVertices[i]);
+  private Vector4f perspectiveTransformation(Matrix4f P, Vector4f p_cam) {
+    // Pbild_tmp = P * Pcam
+    // P_bild = Pbild_tmp / Pbild_tmp.w
+    Vector4f P_bild = P.mult(p_cam);
+    return P_bild.divide(P_bild.w);
+  }
 
-        // Projection
-        vertexPositionTransformed = P.mult(transformedVertices[i]);
-        vertexPositionTransformed = vertexPositionTransformed.divide(vertexPositionTransformed.w);
-        transformedVertices[i] = vertexPositionTransformed;
+  private Vector4f pixelTransformation(Matrix4f K, Vector4f p_bild) {
+    // Pixel Transformation
+    // pbild = K * pbild
+    return K.mult(p_bild);
+  }
 
-        // Pixel Transformation
-        transformedVertices[i] = K.mult(transformedVertices[i]);
-      }
-
-      // Drawing
-      for (int i = 0; i < mesh.getNumberOfTriangles(); i++) {
-        Vector4f A = transformedVertices[mesh.getTriangle(i).getA()]; // 0, 3
-        Vector4f B = transformedVertices[mesh.getTriangle(i).getB()]; // 1, 4
-        Vector4f C = transformedVertices[mesh.getTriangle(i).getC()]; // 2, 5
-        // normale welche richtung?
-        if (backfaceCulling) {
-          if (isClockwiseOrientated(A, B, C)) {
-            drawTriangle(g2, A, B, C);
-          }
-        } else {
-          drawTriangle(g2, A, B, C);
-        }
+  private void drawImage(Graphics2D g2, Vector4f[] transforms) {
+    for (int i = 0; i < mesh.getNumberOfTriangles(); i++) {
+      Vector4f p1 = transforms[mesh.getTriangle(i).getA()];
+      Vector4f p2 = transforms[mesh.getTriangle(i).getB()];
+      Vector4f p3 = transforms[mesh.getTriangle(i).getC()];
+      if (calcAllowedToDraw(p1, p2, p3)) {
+        drawLinesBetweenPoints(g2, new Vector4f[] { p1, p2, p3 });
       }
     }
+  }
+
+  private void drawLinesBetweenPoints(Graphics2D g2, Vector4f[] points) {
+    for (int i = 0; i < points.length; i++) {
+      Vector4f p1 = points[i];
+      Vector4f p2 = points[(i + 1) % points.length]; // automatically connect last point with first point
+      drawLine(g2, new Vector2f(p1.x, p1.y), new Vector2f(p2.x, p2.y), Color.BLACK);
+    }
+  }
+
+  private boolean calcAllowedToDraw(Vector4f p1, Vector4f p2, Vector4f p3) {
+    if (!backfaceCulling) {
+      return true;
+    }
+    Vector2f first = new Vector2f((p2.getX() - p1.getX()), (p2.getY() - p1.getY()));
+    Vector2f second = new Vector2f((p3.getX() - p2.getX()), (p3.getY() - p2.getY()));
+    return first.cross(second).z < 0;
   }
 
   @Override
@@ -196,31 +223,7 @@ public class MyRendererScene extends Scene2D {
         lastMousePosition = null;
       }
     });
+
   }
 
-  private boolean isClockwiseOrientated(Vector4f p1, Vector4f p2, Vector4f p3) {
-    // fläche berechnen: wenn negativ, schaut er auf uns zu, wenn positiv schaut weg
-    // (oder andersrum, debuggen)
-    return calculateSignedAreaOfParallelogram(p1, p2, p3) < 0;
-  }
-
-  private float calculateSignedAreaOfParallelogram(Vector4f p1, Vector4f p2, Vector4f p3) {
-
-    Vector2f first = new Vector2f((p2.getX() - p1.getX()), (p2.getY() - p1.getY()));
-    Vector2f second = new Vector2f((p3.getX() - p2.getX()), (p3.getY() - p2.getY()));
-
-    float cross = first.cross(second).z;
-    System.out.println("kreuz" + cross);
-    // in vorlesungsfolie finden
-    return cross;
-  }
-
-  /**
-   * Draw a triangle using the given coordinates.
-   */
-  private void drawTriangle(Graphics2D g2, Vector4f A, Vector4f B, Vector4f C) {
-    drawLine(g2, new Vector2f(A.x, A.y), new Vector2f(B.x, B.y), Color.BLACK);
-    drawLine(g2, new Vector2f(A.x, A.y), new Vector2f(C.x, C.y), Color.BLACK);
-    drawLine(g2, new Vector2f(B.x, B.y), new Vector2f(C.x, C.y), Color.BLACK);
-  }
 }

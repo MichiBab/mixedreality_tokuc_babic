@@ -29,7 +29,7 @@ public class ObjReader {
   private static final String OP_NEW_OBJECT = "o";
   private static final String OP_USE_MTL = "usemtl";
   private static final ColorRGBA DEFAULT_COLOR = new ColorRGBA(0.5f, 0.5f,
-          0.5f, 1);
+      0.5f, 1);
 
   // Subdirectory used to look for the material file (extracted from mesh file).
   private String directory = "";
@@ -52,16 +52,19 @@ public class ObjReader {
     // Setup
     meshes.clear();
     directory = new File(filename).getParent() + "/";
+    System.out.println("Directory: " + directory);
+    System.out.println("Filename: " + filename);
     currentMesh = new TriangleMesh();
     meshes.add(currentMesh);
     materials = new HashMap<String, ObjMaterial>();
     vertexIndexOffset = 0;
     texCoordOffset = 0;
-    //textureCoordinates.clear();
+    // textureCoordinates.clear();
 
     // Read input
-    //System.out.println("Trying to read OBJ file " + filename);
+    // System.out.println("Trying to read OBJ file " + filename);
     InputStream inputStream = getInputStream(filename);
+    System.out.println("Input stream " + inputStream);
     try {
       String strLine = "";
       DataInputStream in = new DataInputStream(inputStream);
@@ -76,7 +79,7 @@ public class ObjReader {
     }
 
     // Post-process meshes
-    for (Iterator<TriangleMesh> it = meshes.iterator(); it.hasNext(); ) {
+    for (Iterator<TriangleMesh> it = meshes.iterator(); it.hasNext();) {
       TriangleMesh mesh = it.next();
       if (mesh.getNumberOfTriangles() == 0) {
         it.remove();
@@ -97,8 +100,8 @@ public class ObjReader {
 
       mesh.computeTriangleNormals();
       Logger.getInstance().debug("Successfully created triangle mesh with "
-              + mesh.getNumberOfVertices() + " vertices and "
-              + mesh.getNumberOfTriangles() + " triangles.");
+          + mesh.getNumberOfVertices() + " vertices and "
+          + mesh.getNumberOfTriangles() + " triangles.");
     }
 
     if (meshes.size() == 0) {
@@ -108,17 +111,16 @@ public class ObjReader {
     return TriangleMeshTools.unite(meshes);
   }
 
-
   /**
    * Get in input stream from a file.
    */
   private InputStream getInputStream(String filename) {
-    File initialFile = new File("src/main/resources/" + filename);
+    File initialFile = new File("desktop/src/main/resources/" + filename);
     try {
       InputStream stream = new FileInputStream(initialFile);
       if (stream == null) {
         Logger.getInstance().msg(
-                "Mesh file " + filename + " cannot be found.");
+            "Mesh file " + filename + " cannot be found.");
       }
       return stream;
     } catch (FileNotFoundException e) {
@@ -162,7 +164,7 @@ public class ObjReader {
           currentMaterial = mat;
           currentMesh.setTextureName(null);
           if (mat.getTextureFilename() != null
-                  && mat.getTextureFilename().length() > 0) {
+              && mat.getTextureFilename().length() > 0) {
             currentMesh.setTextureName(mat.getTextureFilename());
           }
         }
@@ -185,7 +187,7 @@ public class ObjReader {
       Vector2f t = parseTextureCoordinate(line);
       if (t != null) {
         currentMesh.addTextureCoordinate(t);
-        //textureCoordinates.add(t);
+        // textureCoordinates.add(t);
       }
     }
   }
@@ -204,7 +206,7 @@ public class ObjReader {
 
   private void parseMaterialFile(String materialFilename) {
     currentMaterial = null;
-    //System.out.println("Trying to read material file " + materialFilename);
+    // System.out.println("Trying to read material file " + materialFilename);
     InputStream is = getInputStream(materialFilename);
     try {
       String strLine = "";
@@ -216,7 +218,7 @@ public class ObjReader {
       in.close();
     } catch (Exception e) {
       System.out.println(
-              "Error reading from the material file " + materialFilename + ".");
+          "Error reading from the material file " + materialFilename + ".");
       return;
     }
 
@@ -241,8 +243,8 @@ public class ObjReader {
       String[] components = strLine.split("\\s+");
       if (components.length >= 4) {
         ColorRGBA color = new ColorRGBA(Float.parseFloat(components[1]),
-                Float.parseFloat(components[2]), Float.parseFloat(components[3]),
-                1);
+            Float.parseFloat(components[2]), Float.parseFloat(components[3]),
+            1);
         currentMaterial.setColor(color);
       }
     } else if (operator.equals(OP_MAT_TEXTURE)) {
@@ -292,7 +294,7 @@ public class ObjReader {
         v -= 1;
       }
       // Andrdoid?
-      //return new Vector(u, 1 - v, 0);
+      // return new Vector(u, 1 - v, 0);
       return new Vector2f(u, v);
     }
 
@@ -325,10 +327,10 @@ public class ObjReader {
 
   private void createTriangle(String token1, String token2, String token3) {
     Triangle t = new Triangle(getVertexIndexFromToken(token1),
-            getVertexIndexFromToken(token2), getVertexIndexFromToken(token3));
+        getVertexIndexFromToken(token2), getVertexIndexFromToken(token3));
     t.setTextureCoordinates(getTexCoordIndexFromToken(token1),
-            getTexCoordIndexFromToken(token2),
-            getTexCoordIndexFromToken(token3));
+        getTexCoordIndexFromToken(token2),
+        getTexCoordIndexFromToken(token3));
     t.setColor(DEFAULT_COLOR);
     if (currentMaterial != null) {
       t.setColor(currentMaterial.getColor());
