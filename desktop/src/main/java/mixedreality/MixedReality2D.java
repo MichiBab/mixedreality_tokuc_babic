@@ -12,6 +12,7 @@ import mixedreality.lab.exercise1.BasisFunctionDummy;
 import mixedreality.lab.exercise1.CurveScene2D;
 import mixedreality.lab.exercise2.Assignment2Scene2D;
 import mixedreality.lab.exercise3.MyRendererScene;
+import mixedreality.lab.exercise4.QuadricErrorMetricsSimplification2D;
 import mixedreality.lab.exercise4.SimplificationScene;
 import mixedreality.lab.exercise6.LSystemScene2D;
 import ui.CG2DApplication;
@@ -44,6 +45,7 @@ public class MixedReality2D extends CG2DApplication {
     }
 
     public static void main(String[] args) {
+        QuadricErrorMetricsSimplification2D.testFunctionality();
         new MixedReality2D();
     }
 }

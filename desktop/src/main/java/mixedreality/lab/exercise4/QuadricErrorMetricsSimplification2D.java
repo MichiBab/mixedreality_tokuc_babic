@@ -109,6 +109,7 @@ public class QuadricErrorMetricsSimplification2D {
   }
 
   protected Matrix3f computePointQem(PolygonVertex v) {
+
     // Die QEM für einen Punkt ist die Summe der QEMs aller Kanten, die an dem Punkt
     // anliegen
     Matrix3f Q = new Matrix3f(0, 0, 0, 0, 0, 00, 0, 0, 0);
@@ -236,5 +237,49 @@ public class QuadricErrorMetricsSimplification2D {
       }
     }
     return result;
+  }
+
+  public static void testFunctionality() {
+    Polygon polygon = new Polygon();
+
+    QuadricErrorMetricsSimplification2D simplification = new QuadricErrorMetricsSimplification2D(polygon);
+    // punkte: a = (1,1) b = (4,1) c = (4,3) d = (3,4) e = (1,3)
+    // kanten: ab, bc, cd, de, ea
+    // Erstelle ein neues Polygon
+    // Erstelle die Punkte
+    polygon.addPoint(new Vector2f(1, 1));
+    polygon.addPoint(new Vector2f(4, 1));
+    polygon.addPoint(new Vector2f(4, 3));
+    polygon.addPoint(new Vector2f(3, 4));
+    polygon.addPoint(new Vector2f(1, 3));
+    // Erstelle die Kanten
+    polygon.addEdge(0, 1);
+    polygon.addEdge(1, 2);
+    polygon.addEdge(2, 3);
+    polygon.addEdge(3, 4);
+    polygon.addEdge(4, 0);
+    // Teste Abstandsmatrix zwischen b und c
+    PolygonEdge edge = polygon.getEdge(1);
+    Matrix3f Q = simplification.computeDistanceMatrix(edge);
+    System.out.println("Abstandsmatrix b und c:");
+    System.out.println(Q);
+    assert (Q.equals(new Matrix3f(1, 0, -4, 0, 0, 0, -4, 0, 16)));
+
+    // Teste Fehlerquadrik Vertex Qv_c
+    Matrix3f QEM_c = simplification.computePointQem(polygon.getPoint(2));
+    Matrix3f erg = new Matrix3f((float) 1.5, (float) 0.5, (float) -7.5, (float) 0.5, (float) 0.5, (float) -3.5,
+        (float) -7.5, (float) -3.5, (float) 40.5);
+    System.out.println("QEM_c:");
+    System.out.println(QEM_c);
+    assert (QEM_c.equals(erg));
+
+    // Teste Collapse
+    PolygonEdge edge2 = polygon.getEdge(2);
+    EdgeCollapse QEM_bc = simplification.computeEdgeCollapseResult(edge2);
+    erg = new Matrix3f((float) 2.2, (float) 0.6, (float) -10, (float) 0.6, (float) 1.8, (float) -9, (float) -10,
+        (float) -9, (float) 70);
+    assert (QEM_bc.Q.equals(erg));
+    System.out.println("Neuer Punkt zwischen d und c:");
+    System.out.println(QEM_bc.Q);
   }
 }
