@@ -200,7 +200,7 @@ public class StereoScene extends Scene3D {
     X, Y, Z
   }
 
-  private double computeGradient(Camera leftCamera, Camera rightCamera, Vector3f coordinate, double error, double h,
+  public double computeGradient(Camera leftCamera, Camera rightCamera, Vector3f coordinate, double error, double h,
       Dimension dimension) {
     Vector3f updatedCoordinate = new Vector3f(coordinate);
 
@@ -224,7 +224,7 @@ public class StereoScene extends Scene3D {
     return (updatedError - error) / h;
   }
 
-  private Vector3f gradientDescent(Vector3f coordinate, double gradientX, double gradientY, double gradientZ,
+  public Vector3f gradientDescent(Vector3f coordinate, double gradientX, double gradientY, double gradientZ,
       double lambda) {
     Vector3f updatedCoordinate = new Vector3f(coordinate);
     coordinate.setX((float) (coordinate.getX() - lambda * gradientX));
@@ -233,7 +233,7 @@ public class StereoScene extends Scene3D {
     return updatedCoordinate;
   }
 
-  private Vector3f gradientStep(Vector3f coordinate) {
+  public Vector3f gradientStep(Vector3f coordinate) {
     double lambda = 0.00001;
     double h = 0.001;
 
@@ -250,25 +250,35 @@ public class StereoScene extends Scene3D {
     return coordinate;
   }
 
+  public static Vector3f initialGlobalGuess = new Vector3f(0, 0, 0);
+  public static Vector3f currentGlobalGuess = new Vector3f(0, 0, 0);
+
   @Override
   public void render() {
     double n_steps = 1000;
     // Initial Point
-    Vector3f currentGuess = new Vector3f(0, 0, 0);
+    Vector3f currentGuess = initialGlobalGuess.clone();
     // Update Guess n_steps times
     for (int i = 0; i < n_steps; i++) {
       currentGuess = gradientStep(currentGuess);
     }
-    addPoint(currentGuess, ColorRGBA.Gray);
-    addLine(leftCamera.getEye(), currentGuess, ColorRGBA.Gray);
-    addLine(rightCamera.getEye(), currentGuess, ColorRGBA.Gray);
+    // This is included to being able to run the render function without having the
+    // gui opened for junit testing
+    try {
+      addPoint(currentGuess, ColorRGBA.Gray);
+      addLine(leftCamera.getEye(), currentGuess, ColorRGBA.Gray);
+      addLine(rightCamera.getEye(), currentGuess, ColorRGBA.Gray);
+    } catch (Exception e) {
+    }
+    // Print current Guess
+    currentGlobalGuess = currentGuess;
   }
 
   @Override
   public void update(float time) {
   }
 
-  private Vector2f renderPipeline(Camera camera, Vector3f coordinate) {
+  public Vector2f renderPipeline(Camera camera, Vector3f coordinate) {
     // Model Transformation
     Matrix4f M = new Matrix4f();
     // View Transformation Matrix V
@@ -301,20 +311,20 @@ public class StereoScene extends Scene3D {
     return new Vector2f(projectedCoords.x, projectedCoords.y);
   }
 
-  private double computeError(Vector2f leftScreenCoordsActual, Vector2f leftScreenCoordsComputed,
+  public double computeError(Vector2f leftScreenCoordsActual, Vector2f leftScreenCoordsComputed,
       Vector2f rightScreenCoordsActual, Vector2f rightScreenCoordsComputed) {
     Vector2f errorLeft = leftScreenCoordsActual.subtract(leftScreenCoordsComputed);
     Vector2f errorRight = rightScreenCoordsActual.subtract(rightScreenCoordsComputed);
     return Math.sqrt(errorLeft.dot(errorLeft)) + Math.sqrt(errorRight.dot(errorRight));
   }
 
-  private Vector4f modelTransformation(Matrix4f M, Vector4f p) {
+  public Vector4f modelTransformation(Matrix4f M, Vector4f p) {
     // Von lokalem Koordinatensystem in Weltkoordinatensystem transformieren
     // Pwelt = M * p
     return M.mult(p);
   }
 
-  private Vector4f viewTransformation(Matrix4f V, Vector4f p_welt) {
+  public Vector4f viewTransformation(Matrix4f V, Vector4f p_welt) {
     // Transformiere alle Objekte der Szene in das Kamerakoordinatensystem. Z Achse
     // Koordinatensystem mit Z Achse der Kamera richten. Kamera soll im Ursprung
     // sein und auf die Z Achse blicken
@@ -322,14 +332,14 @@ public class StereoScene extends Scene3D {
     return V.mult(p_welt);
   }
 
-  private Vector4f perspectiveTransformation(Matrix4f P, Vector4f p_cam) {
+  public Vector4f perspectiveTransformation(Matrix4f P, Vector4f p_cam) {
     // Pbild_tmp = P * Pcam
     // P_bild = Pbild_tmp / Pbild_tmp.w
     Vector4f P_bild = P.mult(p_cam);
     return P_bild.divide(P_bild.w);
   }
 
-  private Vector4f pixelTransformation(Matrix4f K, Vector4f p_bild) {
+  public Vector4f pixelTransformation(Matrix4f K, Vector4f p_bild) {
     // Pixel Transformation
     // pbild = K * pbild
     return K.mult(p_bild);

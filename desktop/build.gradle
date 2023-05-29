@@ -20,6 +20,7 @@ sourceSets {
         java {
             srcDirs 'cg_math/src/test/java'
             srcDirs 'cg_ui/src/test/java'
+            srcDirs 'src/test/java'
         }
     }
 }
@@ -44,6 +45,7 @@ dependencies {
 
     // Unit-Testing
     testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
+    implementation('org.junit.jupiter:junit-jupiter:5.8.2')
 
     // Singular value decomposition
     implementation 'gov.nist.math:jama:1.0.3'
