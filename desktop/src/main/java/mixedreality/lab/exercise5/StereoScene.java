@@ -320,11 +320,15 @@ public class StereoScene extends Scene3D {
     return new Vector2f(projectedCoords.x, projectedCoords.y);
   }
 
-  public double computeError(Vector2f leftScreenCoordsActual, Vector2f leftScreenCoordsComputed,
-      Vector2f rightScreenCoordsActual, Vector2f rightScreenCoordsComputed) {
-    Vector2f errorLeft = leftScreenCoordsActual.subtract(leftScreenCoordsComputed);
-    Vector2f errorRight = rightScreenCoordsActual.subtract(rightScreenCoordsComputed);
-    return Math.sqrt(errorLeft.dot(errorLeft)) + Math.sqrt(errorRight.dot(errorRight));
+  public double computeError(Vector2f leftScreenCoords, Vector2f leftScreenCoordsComputed,
+      Vector2f rightScreenCoords, Vector2f rightScreenCoordsComputed) {
+
+    Vector2f errorLeftCam = leftScreenCoords.subtract(leftScreenCoordsComputed);
+    Vector2f errorRightCam = rightScreenCoords.subtract(rightScreenCoordsComputed);
+    double error = errorLeftCam.lengthSquared() + errorRightCam.lengthSquared();
+    error = Math.sqrt(error);
+
+    return error;
   }
 
   public Vector4f modelTransformation(Matrix4f M, Vector4f p) {
