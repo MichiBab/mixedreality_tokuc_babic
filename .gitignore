@@ -1,6 +1,6 @@
 # Not for students eyes ...
 solution/
-
+*.log
 # IntelliJ
 .idea/
 out/

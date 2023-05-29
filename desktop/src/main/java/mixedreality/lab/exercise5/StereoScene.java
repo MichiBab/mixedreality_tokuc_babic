@@ -58,9 +58,9 @@ public class StereoScene extends Scene3D {
     rootNode = null;
 
     leftCamera = new Camera(new Vector3f(3f, 2, 0), new Vector3f(0.5f, 0.5f, 0.5f), new Vector3f(0, 1, 0),
-            degrees2Radiens(90), 1f, 1920, 1080);
+        degrees2Radiens(90), 1f, 1920, 1080);
     rightCamera = new Camera(new Vector3f(-2f, 1f, -2f), new Vector3f(0.5f, 0.5f, 0.5f), new Vector3f(0, 1, 0),
-            degrees2Radiens(90), 1f, 1920, 1080);
+        degrees2Radiens(90), 1f, 1920, 1080);
 
     // Vorgabe
     leftScreenCoords = new Vector2f(1554, 666);
@@ -78,7 +78,7 @@ public class StereoScene extends Scene3D {
     float pixelSizeX = dx * 2 / cam.getWidth();
     float pixelSizeY = dy * 2 / cam.getHeight();
     Vector4f r4 = screenOrigin.add(
-            camMatrix.mult(Vector4f.UNIT_X).mult(pixelSizeX * screenCoords.x)).add(
+        camMatrix.mult(Vector4f.UNIT_X).mult(pixelSizeX * screenCoords.x)).add(
             camMatrix.mult(Vector4f.UNIT_Y).mult(pixelSizeY * screenCoords.y));
     return new Vector3f(r4.x, r4.y, r4.z);
   }
@@ -102,7 +102,7 @@ public class StereoScene extends Scene3D {
     this.assetManager = assetManager;
     this.rootNode = rootNode;
     cameraController.setup(new Vector3f(-3, 3, -3),
-            new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
+        new Vector3f(0, 0, 0), new Vector3f(0, 1, 0));
 
     // Cameras
     visualizeCamera(leftCamera, ColorRGBA.Pink);
@@ -169,9 +169,9 @@ public class StereoScene extends Scene3D {
   protected void addLine(Vector3f start, Vector3f end, ColorRGBA color) {
     Mesh lineMesh = new Mesh();
     lineMesh.setMode(Mesh.Mode.Lines);
-    lineMesh.setBuffer(VertexBuffer.Type.Position, 3, new float[]{start.x, start.y, start.z,
-            end.x, end.y, end.z});
-    lineMesh.setBuffer(VertexBuffer.Type.Index, 2, new short[]{0, 1});
+    lineMesh.setBuffer(VertexBuffer.Type.Position, 3, new float[] { start.x, start.y, start.z,
+        end.x, end.y, end.z });
+    lineMesh.setBuffer(VertexBuffer.Type.Index, 2, new short[] { 0, 1 });
     lineMesh.updateBound();
     lineMesh.updateCounts();
     Geometry lineGeometry = new Geometry("line", lineMesh);
@@ -187,7 +187,7 @@ public class StereoScene extends Scene3D {
   protected void addPoint(Vector3f p, ColorRGBA color) {
     Sphere sphere = new Sphere(10, 10, 0.05f);
     Material mat = new Material(assetManager,
-            "Common/MatDefs/Light/Lighting.j3md");
+        "Common/MatDefs/Light/Lighting.j3md");
     mat.setColor("Diffuse", color);
     mat.setBoolean("UseVertexColor", false);
     Geometry sphereGeometry = new Geometry("sphere", sphere);
@@ -202,6 +202,112 @@ public class StereoScene extends Scene3D {
 
   @Override
   public void render() {
+    // For both camears, create the transformation matrices
+    // Model Transformation (Identity matrix)
+    Matrix4f M_lc = new Matrix4f();
+    // View Transformation Matrix V
+    Matrix4f V_lc = leftCamera.makeCameraMatrix().invert();
+    // Projektionsmatrix P
+    Matrix4f P_lc = new Matrix4f(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 1.0f / leftCamera.getZ0(), 0);
+    // Pixel Transformation/Screen Mapping Matrix K
+    float lfovX = (float) (leftCamera.getWidth() / (2 * Math.tan(leftCamera.getFovX() / 2)));
+    Matrix4f K_lc = new Matrix4f(
+        lfovX, 0, 0, leftCamera.getWidth() / 2,
+        0, lfovX, 0, leftCamera.getHeight() / 2,
+        0, 0, 0, 0,
+        0, 0, 0, 0);
+
+    // The same for the rightCamera
+    Matrix4f M_rc = new Matrix4f();
+    Matrix4f V_rc = rightCamera.makeCameraMatrix().invert();
+    Matrix4f P_rc = new Matrix4f(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 1.0f / rightCamera.getZ0(), 0);
+    float rfovX = (float) (rightCamera.getWidth() / (2 * Math.tan(rightCamera.getFovX() / 2)));
+    Matrix4f K_rc = new Matrix4f(
+        rfovX, 0, 0, rightCamera.getWidth() / 2,
+        0, rfovX, 0, rightCamera.getHeight() / 2,
+        0, 0, 0, 0,
+        0, 0, 0, 0);
+
+    // Target point in world coordinates
+    Vector3f targetPoint = new Vector3f(0, 0, 0);
+    addPoint(targetPoint, ColorRGBA.Green);
+    // Draw line from left camera to target point
+    Vector3f lcTarget = leftCamera.getEye().normalize();
+
+    // Transform the target point into the left camera coordinate system
+    Vector4f targetPoint_lc = modelTransformation(M_lc,
+        new Vector4f(lcTarget.x, lcTarget.y, lcTarget.z, 1.0f));
+    targetPoint_lc = viewTransformation(V_lc, targetPoint_lc);
+    targetPoint_lc = perspectiveTransformation(P_lc, targetPoint_lc);
+    targetPoint_lc = pixelTransformation(K_lc, targetPoint_lc);
+    addPoint(new Vector3f(targetPoint_lc.x, targetPoint_lc.y, targetPoint_lc.z), ColorRGBA.Red);
+    addLine(targetPoint, new Vector3f(targetPoint_lc.x, targetPoint_lc.y, targetPoint_lc.z), ColorRGBA.Red);
+
+    addPoint(lcTarget, ColorRGBA.Red);
+    addLine(lcTarget, targetPoint, ColorRGBA.Green);
+  }
+
+  private Vector4f inverseModelTransformation(Matrix4f M, Vector4f p) {
+    // Von Weltkoordinatensystem in lokales Koordinatensystem transformieren
+    // Pwelt = M^-1 * p
+    return M.invert().mult(p);
+  }
+
+  private Vector4f inverseViewTransformation(Matrix4f V, Vector4f p_cam) {
+    // Transformiere alle Objekte der Szene in das Kamerakoordinatensystem. Z Achse
+    // Koordinatensystem mit Z Achse der Kamera richten. Kamera soll im Ursprung
+    // sein und auf die Z Achse blicken
+    // Pcam = V^-1 * Pwelt
+    return V.invert().mult(p_cam);
+  }
+
+  private Vector4f inversePerspectiveTransformation(Matrix4f P, Vector4f p_bild) {
+    // Pbild_tmp = P^-1 * Pcam
+    // P_bild = Pbild_tmp / Pbild_tmp.w
+    Vector4f P_bild = P.invert().mult(p_bild);
+    return P_bild.divide(P_bild.w);
+  }
+
+  private Vector4f inversePixelTransformation(Matrix4f K, Vector4f p_bild) {
+    // Pbild_tmp = K^-1 * P_bild
+    // P_bild = Pbild_tmp / Pbild_tmp.w
+    System.out.println(K);
+    return K.invert().mult(p_bild);
+  }
+
+  private Vector4f modelTransformation(Matrix4f M, Vector4f p) {
+    // Von lokalem Koordinatensystem in Weltkoordinatensystem transformieren
+    // Pwelt = M * p
+    return M.mult(p);
+  }
+
+  private Vector4f viewTransformation(Matrix4f V, Vector4f p_welt) {
+    // Transformiere alle Objekte der Szene in das Kamerakoordinatensystem. Z Achse
+    // Koordinatensystem mit Z Achse der Kamera richten. Kamera soll im Ursprung
+    // sein und auf die Z Achse blicken
+    // Pcam = V * Pwelt
+    return V.mult(p_welt);
+  }
+
+  private Vector4f perspectiveTransformation(Matrix4f P, Vector4f p_cam) {
+    // Pbild_tmp = P * Pcam
+    // P_bild = Pbild_tmp / Pbild_tmp.w
+    Vector4f P_bild = P.mult(p_cam);
+    return P_bild.divide(P_bild.w);
+  }
+
+  private Vector4f pixelTransformation(Matrix4f K, Vector4f p_bild) {
+    // Pixel Transformation
+    // pbild = K * pbild
+    return K.mult(p_bild);
   }
 
   @Override

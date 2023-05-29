@@ -19,10 +19,10 @@ public class MixedReality3D extends CG3DApplication {
   public MixedReality3D() {
 
     // Assignment 5
-    //setScene3D(new StereoScene());
+    setScene3D(new StereoScene());
 
     // Assignment 7
-    setScene3D(new MarchingCubesScene3D());
+    // setScene3D(new MarchingCubesScene3D());
   }
 
   public static void main(String[] args) {
