@@ -240,19 +240,7 @@ public class StereoScene extends Scene3D {
     Vector3f targetPoint = new Vector3f(0, 0, 0);
     addPoint(targetPoint, ColorRGBA.Green);
     // Draw line from left camera to target point
-    Vector3f lcTarget = leftCamera.getEye().normalize();
-
-    // Transform the target point into the left camera coordinate system
-    Vector4f targetPoint_lc = modelTransformation(M_lc,
-        new Vector4f(lcTarget.x, lcTarget.y, lcTarget.z, 1.0f));
-    targetPoint_lc = viewTransformation(V_lc, targetPoint_lc);
-    targetPoint_lc = perspectiveTransformation(P_lc, targetPoint_lc);
-    targetPoint_lc = pixelTransformation(K_lc, targetPoint_lc);
-    addPoint(new Vector3f(targetPoint_lc.x, targetPoint_lc.y, targetPoint_lc.z), ColorRGBA.Red);
-    addLine(targetPoint, new Vector3f(targetPoint_lc.x, targetPoint_lc.y, targetPoint_lc.z), ColorRGBA.Red);
-
-    addPoint(lcTarget, ColorRGBA.Red);
-    addLine(lcTarget, targetPoint, ColorRGBA.Green);
+    addLine(toWorldCoordinateSystem(leftScreenCoords, leftCamera), targetPoint, ColorRGBA.Green);
   }
 
   private Vector4f inverseModelTransformation(Matrix4f M, Vector4f p) {
