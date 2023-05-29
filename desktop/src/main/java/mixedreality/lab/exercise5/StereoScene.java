@@ -217,8 +217,8 @@ public class StereoScene extends Scene3D {
         break;
     }
 
-    Vector2f leftScreenCoordsUpdated = renderPipeline(leftCamera, updatedCoordinate);
-    Vector2f rightScreenCoordsUpdated = renderPipeline(rightCamera, updatedCoordinate);
+    Vector2f leftScreenCoordsUpdated = renderPixelOnCamera(leftCamera, updatedCoordinate);
+    Vector2f rightScreenCoordsUpdated = renderPixelOnCamera(rightCamera, updatedCoordinate);
     double updatedError = computeError(leftScreenCoords, leftScreenCoordsUpdated, rightScreenCoords,
         rightScreenCoordsUpdated);
 
@@ -238,8 +238,8 @@ public class StereoScene extends Scene3D {
     double lambda = 0.00001;
     double h = 0.001;
 
-    Vector2f leftScreenCoordsFromCurrentCoordinate = renderPipeline(leftCamera, coordinate);
-    Vector2f rightScreenCoordsFromCurrentCoordinate = renderPipeline(rightCamera, coordinate);
+    Vector2f leftScreenCoordsFromCurrentCoordinate = renderPixelOnCamera(leftCamera, coordinate);
+    Vector2f rightScreenCoordsFromCurrentCoordinate = renderPixelOnCamera(rightCamera, coordinate);
 
     double error = computeError(leftScreenCoords, leftScreenCoordsFromCurrentCoordinate, rightScreenCoords,
         rightScreenCoordsFromCurrentCoordinate);
@@ -287,7 +287,7 @@ public class StereoScene extends Scene3D {
   public void update(float time) {
   }
 
-  public Vector2f renderPipeline(Camera camera, Vector3f coordinate) {
+  public Vector2f renderPixelOnCamera(Camera camera, Vector3f coordinate) {
     // Model Transformation
     Matrix4f M = new Matrix4f();
     // View Transformation Matrix V
@@ -299,10 +299,10 @@ public class StereoScene extends Scene3D {
         0, 0, 1, 0,
         0, 0, 1.0f / camera.getZ0(), 0);
     // Pixel Transformation Matrix K
-    float focalLengthX = (float) (camera.getWidth() / (2 * Math.tan(camera.getFovX() / 2)));
+    float fovX = (float) (camera.getWidth() / (2 * Math.tan(camera.getFovX() / 2)));
     Matrix4f K = new Matrix4f(
-        focalLengthX, 0, 0, camera.getWidth() / 2,
-        0, focalLengthX, 0, camera.getHeight() / 2,
+        fovX, 0, 0, camera.getWidth() / 2,
+        0, fovX, 0, camera.getHeight() / 2,
         0, 0, 0, 0,
         0, 0, 0, 0);
     // Transformation Routine
