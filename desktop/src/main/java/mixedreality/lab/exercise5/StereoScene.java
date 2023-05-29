@@ -196,79 +196,116 @@ public class StereoScene extends Scene3D {
     rootNode.attachChild(sphereGeometry);
   }
 
-  @Override
-  public void update(float time) {
+  enum Dimension {
+    X, Y, Z
+  }
+
+  private double computeGradient(Camera leftCamera, Camera rightCamera, Vector3f coordinate, double error, double h,
+      Dimension dimension) {
+    Vector3f updatedCoordinate = new Vector3f(coordinate);
+
+    switch (dimension) {
+      case X:
+        updatedCoordinate.setX(coordinate.getX() + (float) h);
+        break;
+      case Y:
+        updatedCoordinate.setY(coordinate.getY() + (float) h);
+        break;
+      case Z:
+        updatedCoordinate.setZ(coordinate.getZ() + (float) h);
+        break;
+    }
+
+    Vector2f leftScreenCoordsUpdated = renderPipeline(leftCamera, updatedCoordinate);
+    Vector2f rightScreenCoordsUpdated = renderPipeline(rightCamera, updatedCoordinate);
+    double updatedError = computeError(leftScreenCoords, leftScreenCoordsUpdated, rightScreenCoords,
+        rightScreenCoordsUpdated);
+
+    return (updatedError - error) / h;
+  }
+
+  private Vector3f gradientDescent(Vector3f coordinate, double gradientX, double gradientY, double gradientZ,
+      double lambda) {
+    Vector3f updatedCoordinate = new Vector3f(coordinate);
+    coordinate.setX((float) (coordinate.getX() - lambda * gradientX));
+    coordinate.setY((float) (coordinate.getY() - lambda * gradientY));
+    coordinate.setZ((float) (coordinate.getZ() - lambda * gradientZ));
+    return updatedCoordinate;
+  }
+
+  private Vector3f gradientStep(Vector3f coordinate) {
+    double lambda = 0.00001;
+    double h = 0.001;
+
+    Vector2f leftScreenCoordsFromCurrentCoordinate = renderPipeline(leftCamera, coordinate);
+    Vector2f rightScreenCoordsFromCurrentCoordinate = renderPipeline(rightCamera, coordinate);
+    double error = computeError(leftScreenCoords, leftScreenCoordsFromCurrentCoordinate, rightScreenCoords,
+        rightScreenCoordsFromCurrentCoordinate);
+
+    double gradientX = computeGradient(leftCamera, rightCamera, coordinate, error, h, Dimension.X);
+    double gradientY = computeGradient(leftCamera, rightCamera, coordinate, error, h, Dimension.Y);
+    double gradientZ = computeGradient(leftCamera, rightCamera, coordinate, error, h, Dimension.Z);
+
+    gradientDescent(coordinate, gradientX, gradientY, gradientZ, lambda);
+    return coordinate;
   }
 
   @Override
   public void render() {
-    // For both camears, create the transformation matrices
-    // Model Transformation (Identity matrix)
-    Matrix4f M_lc = new Matrix4f();
+    double n_steps = 1000;
+    // Initial Point
+    Vector3f currentGuess = new Vector3f(0, 0, 0);
+    // Update Guess n_steps times
+    for (int i = 0; i < n_steps; i++) {
+      currentGuess = gradientStep(currentGuess);
+    }
+    addPoint(currentGuess, ColorRGBA.Gray);
+    addLine(leftCamera.getEye(), currentGuess, ColorRGBA.Gray);
+    addLine(rightCamera.getEye(), currentGuess, ColorRGBA.Gray);
+  }
+
+  @Override
+  public void update(float time) {
+  }
+
+  private Vector2f renderPipeline(Camera camera, Vector3f coordinate) {
+    // Model Transformation
+    Matrix4f M = new Matrix4f();
     // View Transformation Matrix V
-    Matrix4f V_lc = leftCamera.makeCameraMatrix().invert();
-    // Projektionsmatrix P
-    Matrix4f P_lc = new Matrix4f(
+    Matrix4f V = camera.makeCameraMatrix().invert();
+    // Projection Matrix P
+    Matrix4f P = new Matrix4f(
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
-        0, 0, 1.0f / leftCamera.getZ0(), 0);
-    // Pixel Transformation/Screen Mapping Matrix K
-    float lfovX = (float) (leftCamera.getWidth() / (2 * Math.tan(leftCamera.getFovX() / 2)));
-    Matrix4f K_lc = new Matrix4f(
-        lfovX, 0, 0, leftCamera.getWidth() / 2,
-        0, lfovX, 0, leftCamera.getHeight() / 2,
+        0, 0, 1.0f / camera.getZ0(), 0);
+    // Pixel Transformation Matrix K
+    float focalLengthX = (float) (camera.getWidth() / (2 * Math.tan(camera.getFovX() / 2)));
+    Matrix4f K = new Matrix4f(
+        focalLengthX, 0, 0, camera.getWidth() / 2,
+        0, focalLengthX, 0, camera.getHeight() / 2,
         0, 0, 0, 0,
         0, 0, 0, 0);
-
-    // The same for the rightCamera
-    Matrix4f M_rc = new Matrix4f();
-    Matrix4f V_rc = rightCamera.makeCameraMatrix().invert();
-    Matrix4f P_rc = new Matrix4f(
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 1.0f / rightCamera.getZ0(), 0);
-    float rfovX = (float) (rightCamera.getWidth() / (2 * Math.tan(rightCamera.getFovX() / 2)));
-    Matrix4f K_rc = new Matrix4f(
-        rfovX, 0, 0, rightCamera.getWidth() / 2,
-        0, rfovX, 0, rightCamera.getHeight() / 2,
-        0, 0, 0, 0,
-        0, 0, 0, 0);
-
-    // Target point in world coordinates
-    Vector3f targetPoint = new Vector3f(0, 0, 0);
-    addPoint(targetPoint, ColorRGBA.Green);
-    // Draw line from left camera to target point
-    addLine(toWorldCoordinateSystem(leftScreenCoords, leftCamera), targetPoint, ColorRGBA.Green);
+    // Transformation Routine
+    // Model
+    // Put in 4D vector for transformations
+    Vector4f projectedCoords = new Vector4f(coordinate.getX(), coordinate.getY(),
+        coordinate.getZ(), 1);
+    projectedCoords = modelTransformation(M, projectedCoords);
+    // View
+    projectedCoords = viewTransformation(V, projectedCoords);
+    // Perspective
+    projectedCoords = perspectiveTransformation(P, projectedCoords);
+    // Pixel
+    projectedCoords = pixelTransformation(K, projectedCoords);
+    return new Vector2f(projectedCoords.x, projectedCoords.y);
   }
 
-  private Vector4f inverseModelTransformation(Matrix4f M, Vector4f p) {
-    // Von Weltkoordinatensystem in lokales Koordinatensystem transformieren
-    // Pwelt = M^-1 * p
-    return M.invert().mult(p);
-  }
-
-  private Vector4f inverseViewTransformation(Matrix4f V, Vector4f p_cam) {
-    // Transformiere alle Objekte der Szene in das Kamerakoordinatensystem. Z Achse
-    // Koordinatensystem mit Z Achse der Kamera richten. Kamera soll im Ursprung
-    // sein und auf die Z Achse blicken
-    // Pcam = V^-1 * Pwelt
-    return V.invert().mult(p_cam);
-  }
-
-  private Vector4f inversePerspectiveTransformation(Matrix4f P, Vector4f p_bild) {
-    // Pbild_tmp = P^-1 * Pcam
-    // P_bild = Pbild_tmp / Pbild_tmp.w
-    Vector4f P_bild = P.invert().mult(p_bild);
-    return P_bild.divide(P_bild.w);
-  }
-
-  private Vector4f inversePixelTransformation(Matrix4f K, Vector4f p_bild) {
-    // Pbild_tmp = K^-1 * P_bild
-    // P_bild = Pbild_tmp / Pbild_tmp.w
-    System.out.println(K);
-    return K.invert().mult(p_bild);
+  private double computeError(Vector2f leftScreenCoordsActual, Vector2f leftScreenCoordsComputed,
+      Vector2f rightScreenCoordsActual, Vector2f rightScreenCoordsComputed) {
+    Vector2f errorLeft = leftScreenCoordsActual.subtract(leftScreenCoordsComputed);
+    Vector2f errorRight = rightScreenCoordsActual.subtract(rightScreenCoordsComputed);
+    return Math.sqrt(errorLeft.dot(errorLeft)) + Math.sqrt(errorRight.dot(errorRight));
   }
 
   private Vector4f modelTransformation(Matrix4f M, Vector4f p) {
@@ -309,4 +346,5 @@ public class StereoScene extends Scene3D {
   private float degrees2Radiens(float angleDegrees) {
     return angleDegrees / 180.0f * FastMath.PI;
   }
+
 }
