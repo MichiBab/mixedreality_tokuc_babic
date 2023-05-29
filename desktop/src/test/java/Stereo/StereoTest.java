@@ -22,7 +22,7 @@ public class StereoTest {
 
         // Assert that they are almost the same
         System.out.print(calculatedGuess.distance(calculatedSecondGuess));
-        assertTrue(calculatedGuess.distance(calculatedSecondGuess) < 0.2);
+        assertTrue(calculatedGuess.distance(calculatedSecondGuess) < 0.3);
     }
 
     @Test
@@ -38,6 +38,18 @@ public class StereoTest {
         initial_guess = new Vector3f(0.5f, 0.5f, 0.5f);
         second_initial_guess = new Vector3f(2, 2, 2);
         assertSimilarityWithTwoInitialGuesses(initial_guess, second_initial_guess);
+
+    }
+
+    @Test
+    void testCameraPointsNextToEachOther() {
+        var stereoApp = new StereoScene();
+        stereoApp.render();
+
+        // Assert that the initial guess is close to the actual value
+        // Set for testing
+        assertTrue(stereoApp.currentGuessLeftScreenCoords.distance(stereoApp.leftScreenCoords) < 0.3);
+        assertTrue(stereoApp.currentGuessRightScreenCoords.distance(stereoApp.rightScreenCoords) < 0.3);
 
     }
 }

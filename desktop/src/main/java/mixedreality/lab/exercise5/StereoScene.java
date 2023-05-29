@@ -51,7 +51,8 @@ public class StereoScene extends Scene3D {
   /**
    * Pixel coordinates on the camera screens of the point to be computed
    */
-  protected Vector2f leftScreenCoords, rightScreenCoords;
+  public Vector2f leftScreenCoords, rightScreenCoords;
+  public Vector2f currentGuessLeftScreenCoords, currentGuessRightScreenCoords;
 
   public StereoScene() {
     assetManager = null;
@@ -239,6 +240,7 @@ public class StereoScene extends Scene3D {
 
     Vector2f leftScreenCoordsFromCurrentCoordinate = renderPipeline(leftCamera, coordinate);
     Vector2f rightScreenCoordsFromCurrentCoordinate = renderPipeline(rightCamera, coordinate);
+
     double error = computeError(leftScreenCoords, leftScreenCoordsFromCurrentCoordinate, rightScreenCoords,
         rightScreenCoordsFromCurrentCoordinate);
 
@@ -247,6 +249,10 @@ public class StereoScene extends Scene3D {
     double gradientZ = computeGradient(leftCamera, rightCamera, coordinate, error, h, Dimension.Z);
 
     gradientDescent(coordinate, gradientX, gradientY, gradientZ, lambda);
+
+    // Set for testing
+    currentGuessLeftScreenCoords = leftScreenCoordsFromCurrentCoordinate;
+    currentGuessRightScreenCoords = rightScreenCoordsFromCurrentCoordinate;
     return coordinate;
   }
 
@@ -262,7 +268,9 @@ public class StereoScene extends Scene3D {
     for (int i = 0; i < n_steps; i++) {
       currentGuess = gradientStep(currentGuess);
     }
-    // This is included to being able to run the render function without having the
+
+    // This is included to being able to run the
+    // render function without having the
     // gui opened for junit testing
     try {
       addPoint(currentGuess, ColorRGBA.Gray);
@@ -270,7 +278,8 @@ public class StereoScene extends Scene3D {
       addLine(rightCamera.getEye(), currentGuess, ColorRGBA.Gray);
     } catch (Exception e) {
     }
-    // Print current Guess
+
+    // Set current Global Guess for Testing
     currentGlobalGuess = currentGuess;
   }
 
