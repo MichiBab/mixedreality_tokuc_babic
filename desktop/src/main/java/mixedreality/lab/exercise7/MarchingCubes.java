@@ -181,9 +181,9 @@ public class MarchingCubes {
                         TriangleMeshTools.translate(current, subcubeLowerLeft);
                         TriangleMeshTools.unite(mesh, current);
                         // ZUM TESTEN:
-                        if (test_cnt == 51) {
-                            return current;
-                        }
+                        // if (test_cnt == 51) {
+                        // return current;
+                        // }
                     }
                 }
             }
