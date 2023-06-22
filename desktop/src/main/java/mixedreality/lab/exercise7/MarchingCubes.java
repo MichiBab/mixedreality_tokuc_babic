@@ -195,21 +195,21 @@ public class MarchingCubes {
 
     private int getIndexValue(float[] values, float isovalue) {
         int indexValue = 0;
-        if (values[0] >= isovalue)
+        if (values[0] > isovalue)
             indexValue += 1;
-        if (values[1] >= isovalue)
+        if (values[1] > isovalue)
             indexValue += 2;
-        if (values[2] >= isovalue)
+        if (values[2] > isovalue)
             indexValue += 4;
-        if (values[3] >= isovalue)
+        if (values[3] > isovalue)
             indexValue += 8;
-        if (values[4] >= isovalue)
+        if (values[4] > isovalue)
             indexValue += 16;
-        if (values[5] >= isovalue)
+        if (values[5] > isovalue)
             indexValue += 32;
-        if (values[6] >= isovalue)
+        if (values[6] > isovalue)
             indexValue += 64;
-        if (values[7] >= isovalue)
+        if (values[7] > isovalue)
             indexValue += 128;
         return indexValue;
     }
