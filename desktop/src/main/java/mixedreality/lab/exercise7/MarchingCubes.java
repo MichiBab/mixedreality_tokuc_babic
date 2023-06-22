@@ -43,7 +43,6 @@ public class MarchingCubes {
      */
     public Optional<TriangleMesh> getMesh(Index8Bit index, float[] values, float isovalue) {
         TriangleMesh mesh = new TriangleMesh();
-
         // Lookup table
         int[] list = lookup(index);
 
@@ -51,7 +50,18 @@ public class MarchingCubes {
             return Optional.empty(); // Return empty mesh if no intersection
         }
 
-        for (int i = 0; i < list.length; i += 3) {
+        /*
+         * System.out.println(index);
+         * for (int i = 0; i < list.length; i += 1) {
+         * if (i == 0) {
+         * System.out.print(list[i]);
+         * continue;
+         * }
+         * System.out.print(", " + list[i]);
+         * }
+         * System.out.println();
+         */
+        for (int i = 0; i < list.length - 2; i += 1) {
             if (list[i] == -1 || list[i + 1] == -1 || list[i + 2] == -1) {
                 continue;
             }
