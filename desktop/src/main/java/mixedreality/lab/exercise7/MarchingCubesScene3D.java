@@ -76,6 +76,7 @@ public class MarchingCubesScene3D extends Scene3D {
 
     @Override
     public void handleKey(String keyId) {
+        System.out.println("Got Key: " + keyId);
         switch (keyId) {
             case "KEY_1" -> {
                 f = new Sphere(0.5f, new Vector3f(0, 0, 0));
@@ -119,9 +120,9 @@ public class MarchingCubesScene3D extends Scene3D {
 
         // Sun
         PointLight sun = new PointLight();
-        sun.setPosition(new Vector3f(3,3,3));
+        sun.setPosition(new Vector3f(3, 3, 3));
         sun.setColor(ColorRGBA.White);
-        //sun.setDirection(new Vector3f(0.25f, -1, 0.1f));
+        // sun.setDirection(new Vector3f(0.25f, -1, 0.1f));
         rootNode.addLight(sun);
 
         AmbientLight ambientLight = new AmbientLight();
