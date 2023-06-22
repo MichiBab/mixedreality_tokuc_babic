@@ -44,7 +44,7 @@ public class MarchingCubes {
     public Optional<TriangleMesh> getMesh(Index8Bit index, float[] values, float isovalue) {
         TriangleMesh mesh = new TriangleMesh();
 
-        // Eintrag aus der lookuptable holen über den index
+        // Lookup table
         int[] list = lookup(index);
 
         if (index.toInt() == 0 || index.toInt() == 255) {
@@ -66,11 +66,11 @@ public class MarchingCubes {
             Vector3f interpolatedPoint3 = getEdgePoint(cornerIndex3, values, isovalue);
 
             // Add interpolated points to the `TriangleMesh`
-            int vertexIndex = mesh.addVertex(interpolatedPoint1);
-            vertexIndex = mesh.addVertex(interpolatedPoint2);
-            vertexIndex = mesh.addVertex(interpolatedPoint3);
+            int vertexIndex1 = mesh.addVertex(interpolatedPoint1);
+            int vertexIndex2 = mesh.addVertex(interpolatedPoint2);
+            int vertexIndex3 = mesh.addVertex(interpolatedPoint3);
 
-            mesh.addTriangle(vertexIndex - 2, vertexIndex - 1, vertexIndex);
+            mesh.addTriangle(vertexIndex1, vertexIndex2, vertexIndex3);
         }
 
         return Optional.of(mesh);
@@ -124,6 +124,7 @@ public class MarchingCubes {
     public TriangleMesh makeMesh(ImplicitFunction f, float isovalue, Vector3f ll, Vector3f ur, int resX, int resY,
             int resZ) {
         TriangleMesh mesh = new TriangleMesh();
+
         float sizeX = (ur.x - ll.x) / resX;
         float sizeY = (ur.y - ll.y) / resY;
         float sizeZ = (ur.z - ll.z) / resZ;
@@ -178,17 +179,13 @@ public class MarchingCubes {
 
                         TriangleMesh current = cubeMesh.get();
                         TriangleMeshTools.scale(mesh, sizeX);
-                        TriangleMeshTools.translate(current, subcubeLowerLeft);
+                        TriangleMeshTools.translate(current, corner_points[0]);
                         TriangleMeshTools.unite(mesh, current);
-                        // ZUM TESTEN:
-                        // if (test_cnt == 51) {
-                        // return current;
-                        // }
                     }
                 }
             }
         }
-        System.out.println("Number of vertices: " + mesh.getNumberOfVertices());
+        System.out.println("Number of triangles: " + mesh.getNumberOfTriangles());
 
         return mesh;
     }
