@@ -178,6 +178,10 @@ public class MarchingCubes {
                         test_cnt++;
 
                         TriangleMesh current = cubeMesh.get();
+                        current.computeTriangleNormals();
+                        // If this prints Invalid triangle - cannot compute normal. then something went
+                        // probably wrong with the mesh generation
+
                         TriangleMeshTools.scale(mesh, sizeX);
                         TriangleMeshTools.translate(current, corner_points[0]);
                         TriangleMeshTools.unite(mesh, current);
