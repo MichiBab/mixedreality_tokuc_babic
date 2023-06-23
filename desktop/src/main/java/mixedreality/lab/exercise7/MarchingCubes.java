@@ -137,7 +137,6 @@ public class MarchingCubes {
     public TriangleMesh makeMesh(ImplicitFunction f, float isovalue, Vector3f ll, Vector3f ur, int resX, int resY,
             int resZ) {
         TriangleMesh mesh = new TriangleMesh();
-        int run_cnt = 0;
 
         float sizeX = (ur.x - ll.x) / resX;
         float sizeY = (ur.y - ll.y) / resY;
@@ -189,8 +188,7 @@ public class MarchingCubes {
                     // Generate the mesh for the current cube and add it to the main mesh
                     Optional<TriangleMesh> cubeMesh = getMesh(index,
                             values, isovalue);
-                    System.out.println(run_cnt);
-                    run_cnt++;
+
                     if (cubeMesh.isPresent()) {
                         TriangleMesh current = cubeMesh.get();
                         TriangleMeshTools.scale(mesh, sizeX);
@@ -200,8 +198,9 @@ public class MarchingCubes {
                 }
             }
         }
-        System.out.println("Number of triangles: " + mesh.getNumberOfTriangles());
         mesh.computeTriangleNormals();
+        System.out.println("Number of triangles: " + mesh.getNumberOfTriangles());
+
         return mesh;
     }
 
