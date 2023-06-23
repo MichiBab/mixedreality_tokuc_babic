@@ -159,7 +159,7 @@ public class MarchingCubes {
                     Vector3f[] corner_points = new Vector3f[] {
                             new Vector3f(subcubeLowerLeft.x, subcubeLowerLeft.y, subcubeLowerLeft.z), // x y z
                             new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y, subcubeLowerLeft.z), // x+,y,z
-                            new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y, subcubeLowerLeft.z), // x+,y,z+
+                            new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y, subcubeLowerLeft.z + sizeZ), // x+,y,z+
                             new Vector3f(subcubeLowerLeft.x, subcubeLowerLeft.y, subcubeLowerLeft.z + sizeZ), // x,y,z+
                             new Vector3f(subcubeLowerLeft.x, subcubeLowerLeft.y + sizeY, subcubeLowerLeft.z), // x,y+,z
                             new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y + sizeY, subcubeLowerLeft.z), // x+,y+,z
@@ -185,6 +185,9 @@ public class MarchingCubes {
                             isovalue);
                     Index8Bit index = new Index8Bit();
                     index.fromInt(indexValue);
+                    if (!testIfLookupValid(index)) {
+                        throw new RuntimeException("Invalid lookup table");
+                    }
 
                     // Generate the mesh for the current cube and add it to the main mesh
                     Optional<TriangleMesh> cubeMesh = getMesh(index,
