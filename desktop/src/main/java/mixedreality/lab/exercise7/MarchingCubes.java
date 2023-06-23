@@ -81,7 +81,7 @@ public class MarchingCubes {
     private int[] lookup(Index8Bit index) {
         int[] list = new int[15];
         for (int i = 0; i < 15; i++) {
-            list[i] = faces[index.toInt() + i];
+            list[i] = faces[index.toInt() * 15 + i];
         }
         return list;
     }
@@ -139,12 +139,11 @@ public class MarchingCubes {
     public TriangleMesh makeMesh(ImplicitFunction f, float isovalue, Vector3f ll, Vector3f ur, int resX, int resY,
             int resZ) {
         TriangleMesh mesh = new TriangleMesh();
+        int run_cnt = 0;
 
         float sizeX = (ur.x - ll.x) / resX;
         float sizeY = (ur.y - ll.y) / resY;
         float sizeZ = (ur.z - ll.z) / resZ;
-
-        int run_cnt = 0;
 
         for (int i = 0; i < resX; i++) {
             for (int j = 0; j < resY; j++) {
