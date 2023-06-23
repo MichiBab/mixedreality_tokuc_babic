@@ -25,14 +25,14 @@ public class MarchingCubes {
      * Corner points of a unit cube
      */
     private final Vector3f[] corners = {
-            new Vector3f(-0.5f, -0.5f, -0.5f),
-            new Vector3f(0.5f, -0.5f, -0.5f),
-            new Vector3f(0.5f, -0.5f, 0.5f),
-            new Vector3f(-0.5f, -0.5f, 0.5f),
-            new Vector3f(-0.5f, 0.5f, -0.5f),
-            new Vector3f(0.5f, 0.5f, -0.5f),
-            new Vector3f(0.5f, 0.5f, 0.5f),
-            new Vector3f(-0.5f, 0.5f, 0.5f)
+            new Vector3f(-0.5f, -0.5f, -0.5f), // X Y Z
+            new Vector3f(0.5f, -0.5f, -0.5f), // X+1 Y Z
+            new Vector3f(0.5f, -0.5f, 0.5f), // X+1 Y Z+1
+            new Vector3f(-0.5f, -0.5f, 0.5f), // X Y Z+1
+            new Vector3f(-0.5f, 0.5f, -0.5f), // X Y+1 Z
+            new Vector3f(0.5f, 0.5f, -0.5f), // X+1 Y+1 Z
+            new Vector3f(0.5f, 0.5f, 0.5f), // X+1 Y+1 Z+1
+            new Vector3f(-0.5f, 0.5f, 0.5f) // X Y+1 Z+1
     };
 
     public MarchingCubes() {
@@ -50,20 +50,12 @@ public class MarchingCubes {
             return Optional.empty(); // Return empty mesh if no intersection
         }
 
-        /*
-         * System.out.println(index);
-         * for (int i = 0; i < list.length; i += 1) {
-         * if (i == 0) {
-         * System.out.print(list[i]);
-         * continue;
-         * }
-         * System.out.print(", " + list[i]);
-         * }
-         * System.out.println();
-         */
-        for (int i = 0; i < list.length - 2; i += 1) {
-            if (list[i] == -1 || list[i + 1] == -1 || list[i + 2] == -1) {
+        for (int i = 0; i < list.length; i += 3) {
+            if (list[i] == -1 && list[i + 1] == -1 && list[i + 2] == -1) {
                 continue;
+            }
+            if (list[i] == -1 || list[i + 1] == -1 || list[i + 2] == -1) {
+                throw new IllegalAccessError("Invalid Indexing.");
             }
             // Valid triangle
             int cornerIndex1 = list[i];
@@ -92,6 +84,19 @@ public class MarchingCubes {
             list[i] = faces[index.toInt() + i];
         }
         return list;
+    }
+
+    private boolean testIfLookupValid(Index8Bit index) {
+        int[] list = lookup(index);
+        for (int i = 0; i < list.length; i += 3) {
+            if (list[i] == -1 && list[i + 1] == -1 && list[i + 2] == -1) {
+                continue;
+            }
+            if (list[i] == -1 || list[i + 1] == -1 || list[i + 2] == -1) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -140,6 +145,7 @@ public class MarchingCubes {
         float sizeZ = (ur.z - ll.z) / resZ;
 
         int test_cnt = 0;
+        int run_cnt = 0;
 
         for (int i = 0; i < resX; i++) {
             for (int j = 0; j < resY; j++) {
@@ -152,15 +158,15 @@ public class MarchingCubes {
 
                     // Calculate the 8 corner points of the current subcube
                     Vector3f[] corner_points = new Vector3f[] {
-                            subcubeLowerLeft,
-                            new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y, subcubeLowerLeft.z),
-                            new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y + sizeY, subcubeLowerLeft.z),
-                            new Vector3f(subcubeLowerLeft.x, subcubeLowerLeft.y + sizeY, subcubeLowerLeft.z),
-                            new Vector3f(subcubeLowerLeft.x, subcubeLowerLeft.y, subcubeLowerLeft.z + sizeZ),
-                            new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y, subcubeLowerLeft.z + sizeZ),
+                            new Vector3f(subcubeLowerLeft.x, subcubeLowerLeft.y, subcubeLowerLeft.z), // x y z
+                            new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y, subcubeLowerLeft.z), // x+,y,z
+                            new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y, subcubeLowerLeft.z), // x+,y,z+
+                            new Vector3f(subcubeLowerLeft.x, subcubeLowerLeft.y, subcubeLowerLeft.z + sizeZ), // x,y,z+
+                            new Vector3f(subcubeLowerLeft.x, subcubeLowerLeft.y + sizeY, subcubeLowerLeft.z), // x,y+,z
+                            new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y + sizeY, subcubeLowerLeft.z), // x+,y+,z
                             new Vector3f(subcubeLowerLeft.x + sizeX, subcubeLowerLeft.y + sizeY,
-                                    subcubeLowerLeft.z + sizeZ),
-                            new Vector3f(subcubeLowerLeft.x, subcubeLowerLeft.y + sizeY, subcubeLowerLeft.z + sizeZ)
+                                    subcubeLowerLeft.z + sizeZ), // x+,y+,z+
+                            new Vector3f(subcubeLowerLeft.x, subcubeLowerLeft.y + sizeY, subcubeLowerLeft.z + sizeZ) // x,y+,z+
                     };
 
                     // Compute function values for the eight corners
@@ -184,21 +190,16 @@ public class MarchingCubes {
                     // Generate the mesh for the current cube and add it to the main mesh
                     Optional<TriangleMesh> cubeMesh = getMesh(index,
                             values, isovalue);
+                    System.out.println(run_cnt);
+                    run_cnt++;
                     if (cubeMesh.isPresent()) {
-                        test_cnt++;
-
                         TriangleMesh current = cubeMesh.get();
-
                         // If this prints Invalid triangle - cannot compute normal. then something went
                         // probably wrong with the mesh generation
                         // current.computeTriangleNormals();
-
-                        TriangleMeshTools.scale(mesh, sizeX);
                         TriangleMeshTools.translate(current, corner_points[0]);
+                        TriangleMeshTools.scale(mesh, sizeX);
                         TriangleMeshTools.unite(mesh, current);
-                        // if (test_cnt >= 5) {
-                        // return mesh;
-                        // }
                     }
                 }
             }
