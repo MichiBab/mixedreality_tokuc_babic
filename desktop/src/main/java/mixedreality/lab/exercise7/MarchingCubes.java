@@ -166,14 +166,14 @@ public class MarchingCubes {
 
                     // Compute function values for the eight corners
                     float[] values = new float[] {
-                            f.eval(corner_points[0]),
-                            f.eval(corner_points[1]),
-                            f.eval(corner_points[2]),
-                            f.eval(corner_points[3]),
-                            f.eval(corner_points[4]),
-                            f.eval(corner_points[5]),
+                            f.eval(corner_points[7]),
                             f.eval(corner_points[6]),
-                            f.eval(corner_points[7])
+                            f.eval(corner_points[5]),
+                            f.eval(corner_points[4]),
+                            f.eval(corner_points[3]),
+                            f.eval(corner_points[2]),
+                            f.eval(corner_points[1]),
+                            f.eval(corner_points[0])
                     };
 
                     // Create the index and convert it to an Index8Bit object
@@ -191,8 +191,11 @@ public class MarchingCubes {
 
                     if (cubeMesh.isPresent()) {
                         TriangleMesh current = cubeMesh.get();
-                        TriangleMeshTools.scale(mesh, sizeX);
+                        // current.flipTriangleOrientation();
                         TriangleMeshTools.translate(current, corner_points[0]);
+                        // TODO scale
+                        // TriangleMeshTools.scale(mesh, ???);
+
                         TriangleMeshTools.unite(mesh, current);
                     }
                 }
