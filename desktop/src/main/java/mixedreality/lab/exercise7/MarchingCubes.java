@@ -54,9 +54,7 @@ public class MarchingCubes {
             if (list[i] == -1 && list[i + 1] == -1 && list[i + 2] == -1) {
                 continue;
             }
-            if (list[i] == -1 || list[i + 1] == -1 || list[i + 2] == -1) {
-                throw new IllegalAccessError("Invalid Indexing.");
-            }
+
             // Valid triangle
             int edgeIndex1 = list[i];
             int edgeIndex2 = list[i + 1];
