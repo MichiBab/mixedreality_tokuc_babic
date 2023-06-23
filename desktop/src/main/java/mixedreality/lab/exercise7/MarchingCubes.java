@@ -151,9 +151,9 @@ public class MarchingCubes {
                 for (int k = 0; k < resZ; k++) {
                     // Calculate the lower left point of the current subcube
                     Vector3f subcubeLowerLeft = new Vector3f(
-                            ll.x + i * sizeX,
-                            ll.y + j * sizeY,
-                            ll.z + k * sizeZ);
+                            ll.x + (i * sizeX),
+                            ll.y + (j * sizeY),
+                            ll.z + (k * sizeZ));
 
                     // Calculate the 8 corner points of the current subcube
                     Vector3f[] corner_points = new Vector3f[] {
@@ -193,9 +193,6 @@ public class MarchingCubes {
                     run_cnt++;
                     if (cubeMesh.isPresent()) {
                         TriangleMesh current = cubeMesh.get();
-                        // If this prints Invalid triangle - cannot compute normal. then something went
-                        // probably wrong with the mesh generation
-                        // current.computeTriangleNormals();
                         TriangleMeshTools.scale(mesh, sizeX);
                         TriangleMeshTools.translate(current, corner_points[0]);
                         TriangleMeshTools.unite(mesh, current);
