@@ -58,14 +58,14 @@ public class MarchingCubes {
                 throw new IllegalAccessError("Invalid Indexing.");
             }
             // Valid triangle
-            int cornerIndex1 = list[i];
-            int cornerIndex2 = list[i + 1];
-            int cornerIndex3 = list[i + 2];
+            int edgeIndex1 = list[i];
+            int edgeIndex2 = list[i + 1];
+            int edgeIndex3 = list[i + 2];
 
             // Calculate interpolated points for each edge of the triangle
-            Vector3f interpolatedPoint1 = getEdgePoint(cornerIndex1, values, isovalue);
-            Vector3f interpolatedPoint2 = getEdgePoint(cornerIndex2, values, isovalue);
-            Vector3f interpolatedPoint3 = getEdgePoint(cornerIndex3, values, isovalue);
+            Vector3f interpolatedPoint1 = getEdgePoint(edgeIndex1, values, isovalue);
+            Vector3f interpolatedPoint2 = getEdgePoint(edgeIndex2, values, isovalue);
+            Vector3f interpolatedPoint3 = getEdgePoint(edgeIndex3, values, isovalue);
 
             // Add interpolated points to the `TriangleMesh`
             int vertexIndex1 = mesh.addVertex(interpolatedPoint1);
@@ -144,7 +144,6 @@ public class MarchingCubes {
         float sizeY = (ur.y - ll.y) / resY;
         float sizeZ = (ur.z - ll.z) / resZ;
 
-        int test_cnt = 0;
         int run_cnt = 0;
 
         for (int i = 0; i < resX; i++) {
@@ -197,8 +196,8 @@ public class MarchingCubes {
                         // If this prints Invalid triangle - cannot compute normal. then something went
                         // probably wrong with the mesh generation
                         // current.computeTriangleNormals();
-                        TriangleMeshTools.translate(current, corner_points[0]);
                         TriangleMeshTools.scale(mesh, sizeX);
+                        TriangleMeshTools.translate(current, corner_points[0]);
                         TriangleMeshTools.unite(mesh, current);
                     }
                 }
