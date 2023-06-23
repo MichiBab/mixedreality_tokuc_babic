@@ -192,9 +192,9 @@ public class MarchingCubes {
                     if (cubeMesh.isPresent()) {
                         TriangleMesh current = cubeMesh.get();
                         // current.flipTriangleOrientation();
-                        TriangleMeshTools.translate(current, corner_points[0]);
                         // TODO scale
                         // TriangleMeshTools.scale(mesh, ???);
+                        TriangleMeshTools.translate(current, corner_points[0]);
 
                         TriangleMeshTools.unite(mesh, current);
                     }
