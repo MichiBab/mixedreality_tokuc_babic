@@ -175,9 +175,8 @@ public class MarchingCubes {
                             isovalue);
                     Index8Bit index = new Index8Bit();
                     index.fromInt(indexValue);
-                    if (!testIfLookupValid(index)) {
-                        throw new RuntimeException("Invalid lookup table");
-                    }
+
+                    assert (testIfLookupValid(index));
 
                     // Generate the mesh for the current cube and add it to the main mesh
                     Optional<TriangleMesh> cubeMesh = getMesh(index,
@@ -196,7 +195,7 @@ public class MarchingCubes {
         }
         mesh.computeTriangleNormals();
         System.out.println("Number of triangles: " + mesh.getNumberOfTriangles());
-
+        assert (mesh.testComputeTriangleNormals());
         return mesh;
     }
 

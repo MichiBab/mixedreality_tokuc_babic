@@ -123,6 +123,29 @@ public class TriangleMesh {
         }
     }
 
+    public boolean testComputeTriangleNormals() {
+        for (int tIndex = 0; tIndex < getNumberOfTriangles(); tIndex++) {
+            Triangle t = triangles.get(tIndex);
+            Vector3f a = vertices.get(t.getVertexIndex(0)).getPosition();
+            Vector3f b = vertices.get(t.getVertexIndex(1)).getPosition();
+            Vector3f c = vertices.get(t.getVertexIndex(2)).getPosition();
+            Vector3f u = b.subtract(a);
+            Vector3f v = c.subtract(a);
+            Vector3f normal = u.cross(v);
+            float norm = normal.length();
+            if (norm > 1e-8) {
+                normal = normal.mult(1.0f / norm);
+            } else {
+                Logger.getInstance().error("Invalid triangle - cannot compute " +
+                        "normal.");
+                return false;
+            }
+            // t.setNormal(normal);
+
+        }
+        return true;
+    }
+
     /**
      * Add the given texture coordinate, return index in tex coord list.
      */

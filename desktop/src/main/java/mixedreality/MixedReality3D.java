@@ -25,6 +25,15 @@ public class MixedReality3D extends CG3DApplication {
     setScene3D(new MarchingCubesScene3D());
   }
 
+  public MixedReality3D(MarchingCubesScene3D scene) {
+
+    // Assignment 5
+    // setScene3D(new StereoScene());
+
+    // Assignment 7
+    setScene3D(scene);
+  }
+
   public static void main(String[] args) {
     // Setup JME app
     var app = new MixedReality3D();
