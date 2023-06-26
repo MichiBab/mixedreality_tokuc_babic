@@ -40,7 +40,7 @@ public class TriangleMeshTools {
     }
     for (int i = 0; i < otherMesh.getNumberOfTextureCoordinates(); i++) {
       baseMesh.addTextureCoordinate(
-              new Vector2f(otherMesh.getTextureCoordinate(i)));
+          new Vector2f(otherMesh.getTextureCoordinate(i)));
     }
     for (int i = 0; i < otherMesh.getNumberOfTriangles(); i++) {
       Triangle t = new Triangle(otherMesh.getTriangle(i));
@@ -87,7 +87,6 @@ public class TriangleMeshTools {
     return mesh;
   }
 
-
   /**
    * Move all vertices with the offset vector (x, y, z)
    */
@@ -95,7 +94,7 @@ public class TriangleMeshTools {
     for (int i = 0; i < mesh.getNumberOfVertices(); i++) {
       Vertex v = mesh.getVertex(i);
       v.getPosition().set(v.getPosition().x + x, v.getPosition().y + y,
-              v.getPosition().z + z);
+          v.getPosition().z + z);
     }
   }
 
@@ -128,7 +127,7 @@ public class TriangleMeshTools {
    * Create a geometry object for a triangle mesh.
    */
   public static Geometry createJMonkeyMesh(AssetManager assetManager, TriangleMesh triangleMesh,
-                                           String textureFilename, String normalMapFilename) {
+      String textureFilename, String normalMapFilename) {
     Mesh mesh = new Mesh();
     mesh.setMode(Mesh.Mode.Triangles);
 
@@ -152,18 +151,17 @@ public class TriangleMeshTools {
         Vector3f pos = vertex.getPosition();
         Vector3f normal = t.getNormal();
         ColorRGBA color = t.getColor();
-        Vector2f texCoord = texCoordIndex >= 0 ? triangleMesh.getTextureCoordinate(texCoordIndex) :
-                new Vector2f(0, 0);
+        Vector2f texCoord = texCoordIndex >= 0 ? triangleMesh.getTextureCoordinate(texCoordIndex) : new Vector2f(0, 0);
 
         // Position
-        positionBuffer[triangleIndex * 9 + vertexInTriangleIndex * 3] =pos.get(0);
+        positionBuffer[triangleIndex * 9 + vertexInTriangleIndex * 3] = pos.get(0);
         positionBuffer[triangleIndex * 9 + vertexInTriangleIndex * 3 + 1] = pos.get(1);
-        positionBuffer[triangleIndex * 9 + vertexInTriangleIndex * 3 + 2] =  pos.get(2);
+        positionBuffer[triangleIndex * 9 + vertexInTriangleIndex * 3 + 2] = pos.get(2);
 
         // Normal
         normalBuffer[triangleIndex * 9 + vertexInTriangleIndex * 3] = normal.get(0);
         normalBuffer[triangleIndex * 9 + vertexInTriangleIndex * 3 + 1] = normal.get(1);
-        normalBuffer[triangleIndex * 9 + vertexInTriangleIndex * 3 + 2] =  normal.get(2);
+        normalBuffer[triangleIndex * 9 + vertexInTriangleIndex * 3 + 2] = normal.get(2);
 
         // Color
         colorBuffer[triangleIndex * 12 + vertexInTriangleIndex * 4] = color.r;
@@ -190,7 +188,7 @@ public class TriangleMeshTools {
     Geometry geom = new Geometry("triangle mesh", mesh);
 
     Material mat = new Material(assetManager,
-            "Common/MatDefs/Light/Lighting.j3md");
+        "Common/MatDefs/Light/Lighting.j3md");
     mat.setColor("Diffuse", ColorRGBA.White);
     mat.setBoolean("UseMaterialColors", true);
     mat.setBoolean("UseVertexColor", true);
@@ -240,7 +238,7 @@ public class TriangleMeshTools {
     TriangleMesh mesh = new TriangleMesh();
 
     int RESOLUTION = 10;
-    float radiusSmall = 0.035f *  scale;
+    float radiusSmall = 0.035f * scale;
     float radiusLarge = 0.08f * scale;
     float segmentLength = 0.8f;
 
@@ -248,24 +246,24 @@ public class TriangleMeshTools {
     for (int i = 0; i < RESOLUTION; i++) {
       float alpha = (float) i / (float) RESOLUTION * 2.0f * MathF.PI;
       mesh.addVertex(new Vertex(new Vector3f(0,
-              MathF.sin(alpha) * radiusSmall, MathF.cos(alpha) * radiusSmall)));
+          MathF.sin(alpha) * radiusSmall, MathF.cos(alpha) * radiusSmall)));
     }
     // Shaft inner vertices
     for (int i = 0; i < RESOLUTION; i++) {
       float alpha = (float) i / (float) RESOLUTION * 2.0f * MathF.PI;
       mesh.addVertex(new Vertex(new Vector3f(segmentLength,
-              MathF.sin(alpha) * radiusSmall, MathF.cos(alpha) * radiusSmall)));
+          MathF.sin(alpha) * radiusSmall, MathF.cos(alpha) * radiusSmall)));
     }
     // Shaft outer vertices
     for (int i = 0; i < RESOLUTION; i++) {
       float alpha = (float) i / (float) RESOLUTION * 2.0f * MathF.PI;
       mesh.addVertex(new Vertex(new Vector3f(segmentLength,
-              MathF.sin(alpha) * radiusLarge, MathF.cos(alpha) * radiusLarge)));
+          MathF.sin(alpha) * radiusLarge, MathF.cos(alpha) * radiusLarge)));
     }
     int bottomIndex = mesh
-            .addVertex(new Vertex(new Vector3f(0, 0, 0)));
+        .addVertex(new Vertex(new Vector3f(0, 0, 0)));
     int topIndex = mesh
-            .addVertex(new Vertex(new Vector3f(1, 0, 0)));
+        .addVertex(new Vertex(new Vector3f(1, 0, 0)));
 
     // Triangles at the bottom
     for (int i = 0; i < RESOLUTION; i++) {
@@ -280,16 +278,14 @@ public class TriangleMeshTools {
     // Triangles shaft inner -> shaft outer
     for (int i = 0; i < RESOLUTION; i++) {
       int iPlus = (i + 1) % RESOLUTION;
-      mesh.addTriangle(new Triangle(RESOLUTION + i, 2 * RESOLUTION + iPlus, RESOLUTION + iPlus
-      ));
-      mesh.addTriangle(new Triangle(RESOLUTION + i, 2 * RESOLUTION + i, 2 * RESOLUTION + iPlus
-      ));
+      mesh.addTriangle(new Triangle(RESOLUTION + i, 2 * RESOLUTION + iPlus, RESOLUTION + iPlus));
+      mesh.addTriangle(new Triangle(RESOLUTION + i, 2 * RESOLUTION + i, 2 * RESOLUTION + iPlus));
     }
     // Triangles at top
     for (int i = 0; i < RESOLUTION; i++) {
       int iPlus = (i + 1) % RESOLUTION;
       mesh.addTriangle(
-              new Triangle(2 * RESOLUTION + i, topIndex, 2 * RESOLUTION + iPlus));
+          new Triangle(2 * RESOLUTION + i, topIndex, 2 * RESOLUTION + iPlus));
     }
 
     mesh.computeTriangleNormals();
