@@ -23,7 +23,7 @@ public class LSystemScene2D extends Scene2D {
      * The axiom is a single character
      *
      */
-    protected Character axiom;
+    protected String axiom;
     /**
      * 
      * All rules are in a map which maps a character to its replacement.
@@ -45,9 +45,9 @@ public class LSystemScene2D extends Scene2D {
 
     public LSystemScene2D(int width, int height) {
         super(width, height, new Vector2f(-1, -1), new Vector2f(1, 1));
-        this.axiom = 'F';
+        this.axiom = "F-F-F+F";
         this.rules = new HashMap<>();
-        this.rules.put('F', "F+F--F+F");
+        this.rules.put('F', "FFF");
         this.rules.put('-', "-");
         this.rules.put('+', "+");
         this.numIterations = 3;
@@ -55,7 +55,7 @@ public class LSystemScene2D extends Scene2D {
         // Run derivation
         derive();
         // Debugging: show derived word.
-        System.out.println("currentWord contructor: " + currentWord);
+        System.out.println("Derived: " + currentWord);
     }
 
     /**
@@ -68,7 +68,7 @@ public class LSystemScene2D extends Scene2D {
     protected void derive() {
         // Your task
         currentWord = axiom.toString();
-        System.out.println("currentWord" + currentWord);
+        System.out.println("Axiom: " + currentWord);
         for (int i = 0; i < numIterations; i++) {
             String newWord = "";
             for (int j = 0; j < currentWord.length(); j++) {
@@ -91,6 +91,7 @@ public class LSystemScene2D extends Scene2D {
         Vector2f pos = new Vector2f(0, 0);
         Vector2f dir = new Vector2f(1, 0);
         float angle = 0;
+        float angle_update = (float) (Math.PI / 3);
         float lineLength = 0.1f / numIterations;
         // Stack to store turtle states
         Stack<TurtleState> turtleStack = new Stack<>();
@@ -104,11 +105,11 @@ public class LSystemScene2D extends Scene2D {
                 pos = newPos;
             } else if (c == '+') {
                 // Rotate clockwise
-                angle += Math.PI / 3;
+                angle += angle_update;
                 dir = new Vector2f((float) Math.cos(angle), (float) Math.sin(angle));
             } else if (c == '-') {
                 // Rotate counterclockwise
-                angle -= Math.PI / 3;
+                angle -= angle_update;
                 dir = new Vector2f((float) Math.cos(angle), (float) Math.sin(angle));
             } else if (c == '[') {
                 // Push turtle state
